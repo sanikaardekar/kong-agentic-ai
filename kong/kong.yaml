@@ -1,0 +1,17 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: job-service
+    url: http://job-service:3000
+    routes:
+      - name: job-service-route
+        paths: ["/jobs"]
+        strip_path: false
+        methods: ["GET"]
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 60   # cap at 60 requests/min per IP
+              policy: local
+              limit_by: ip
