@@ -12,6 +12,26 @@ services:
         plugins:
           - name: rate-limiting
             config:
-              minute: 60   # cap at 60 requests/min per IP
+              minute: 60
               policy: local
               limit_by: ip
+
+  - name: email-service
+    url: http://email-service:4000
+    routes:
+      - name: email-service-route
+        paths: ["/email"]
+        strip_path: true
+        methods: ["POST"]
+        plugins:
+          - name: key-auth
+          - name: rate-limiting
+            config:
+              minute: 20
+              policy: local
+              limit_by: consumer
+
+consumers:
+  - username: email-user
+    keyauth_credentials:
+      - key: demo-key-123
