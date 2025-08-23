@@ -11,12 +11,7 @@ import type { NormalizedJob, Source } from "./types.js";
 
 const app = express();
 app.use(morgan("dev"));
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  credentials: true,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'apikey']
-}));
+app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
@@ -63,7 +58,17 @@ app.get("/job/:source/:id", async (req, res) => {
   }
 });
 
-app.post("/search", async (req, res) => {
+// Handle search via POST to /jobs
+app.post("/jobs", async (req, res) => {
+  // If body has search params, do search
+  if (req.body.jobRole) {
+    return handleSearch(req, res);
+  }
+  // Otherwise return error
+  return res.status(400).json({ error: "Invalid request" });
+});
+
+async function handleSearch(req: any, res: any) {
   try {
     const parsed = SearchSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -78,22 +83,20 @@ app.post("/search", async (req, res) => {
     const { jobRole, experience, location, company } = parsed.data;
     let allJobs: NormalizedJob[] = [];
 
-    // Fetch from Indeed (most reliable)
-    try {
-      const indeedJobs = await fetchIndeedJobs(jobRole, location, experience);
-      allJobs.push(...indeedJobs);
-    } catch (err) {
-      console.log("Indeed fetch failed:", err);
-    }
+    console.log(`DEBUG: company parameter = '${company}'`);
+    console.log(`DEBUG: company truthy check = ${!!company}`);
 
-    // Fetch from Greenhouse if company specified
     if (company) {
+      // If company specified, only fetch from that specific company
+      console.log(`DEBUG: COMPANY BRANCH - Searching for ${jobRole} at ${company} only`);
+      
       try {
         const greenhouseJobs = await fetchGreenhouseJobs(company);
         const filtered = greenhouseJobs.filter(job => 
           job.title.toLowerCase().includes(jobRole.toLowerCase())
         );
         allJobs.push(...filtered);
+        console.log(`Found ${filtered.length} Greenhouse jobs at ${company}`);
       } catch (err) {
         console.log(`Greenhouse fetch failed for ${company}:`, err);
       }
@@ -104,17 +107,67 @@ app.post("/search", async (req, res) => {
           job.title.toLowerCase().includes(jobRole.toLowerCase())
         );
         allJobs.push(...filtered);
+        console.log(`Found ${filtered.length} Lever jobs at ${company}`);
       } catch (err) {
         console.log(`Lever fetch failed for ${company}:`, err);
       }
-    }
+    } else {
+      // No specific company - fetch from all sources
+      console.log(`DEBUG: NO COMPANY BRANCH - Fetching from all sources`);
+      
+      // Fetch from Indeed
+      try {
+        const indeedJobs = await fetchIndeedJobs(jobRole, location, experience);
+        allJobs.push(...indeedJobs);
+        console.log(`Found ${indeedJobs.length} Indeed jobs`);
+      } catch (err) {
+        console.log("Indeed fetch failed:", err);
+      }
 
-    // Fetch from Naukri
-    try {
-      const naukriJobs = await fetchNaukriJobs(jobRole, location, experience);
-      allJobs.push(...naukriJobs);
-    } catch (err) {
-      console.log("Naukri fetch failed:", err);
+      // Fetch from Naukri
+      try {
+        const naukriJobs = await fetchNaukriJobs(jobRole, location, experience);
+        allJobs.push(...naukriJobs);
+        console.log(`Found ${naukriJobs.length} Naukri jobs`);
+      } catch (err) {
+        console.log("Naukri fetch failed:", err);
+      }
+
+      // Fetch from popular companies on Greenhouse/Lever (parallel)
+      const popularCompanies = ['airbnb', 'stripe', 'shopify', 'netflix'];
+      
+      const companyPromises = popularCompanies.map(async (companyName) => {
+        const jobs: NormalizedJob[] = [];
+        try {
+          const greenhouseJobs = await fetchGreenhouseJobs(companyName);
+          const filtered = greenhouseJobs.filter(job => 
+            job.title.toLowerCase().includes(jobRole.toLowerCase())
+          );
+          jobs.push(...filtered);
+        } catch (err) {
+          // Silently continue
+        }
+
+        try {
+          const leverJobs = await fetchLeverJobs(companyName);
+          const filtered = leverJobs.filter(job => 
+            job.title.toLowerCase().includes(jobRole.toLowerCase())
+          );
+          jobs.push(...filtered);
+        } catch (err) {
+          // Silently continue
+        }
+        return jobs;
+      });
+      
+      const companyResults = await Promise.allSettled(companyPromises);
+      companyResults.forEach(result => {
+        if (result.status === 'fulfilled') {
+          allJobs.push(...result.value);
+        }
+      });
+      
+      console.log(`Found ${allJobs.length} total jobs from all sources`);
     }
 
     // Remove duplicates
@@ -136,17 +189,22 @@ app.post("/search", async (req, res) => {
       rawData: job.raw // Full raw data for email service
     }));
 
+    const message = (company && formattedJobs.length === 0) 
+      ? `No jobs found for ${company}. We suggest you go to their careers page.`
+      : null;
+
     res.json({
       searchParams: { jobRole, experience, location, company },
       totalJobs: formattedJobs.length,
       jobs: formattedJobs,
-      sources: [...new Set(allJobs.map(j => j.source))]
+      sources: [...new Set(allJobs.map(j => j.source))],
+      message
     });
   } catch (err: any) {
     console.error(err);
     res.status(500).json({ error: err?.message ?? "Search failed" });
   }
-});
+}
 
 app.get("/jobs", async (req, res) => {
   try {

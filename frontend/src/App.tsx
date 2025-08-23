@@ -14,6 +14,7 @@ function App() {
   });
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [draftedEmail, setDraftedEmail] = useState<DraftedEmail | null>(null);
   const [draftingJobId, setDraftingJobId] = useState<number | null>(null);
   const [emailPanelWidth, setEmailPanelWidth] = useState(500);
@@ -22,7 +23,7 @@ function App() {
   const searchJobs = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/search', {
+      const response = await fetch('http://localhost:8000/jobs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,6 +33,7 @@ function App() {
       });
       const data = await response.json();
       setJobs(data.jobs || []);
+      setMessage(data.message || null);
     } catch (error) {
       console.error('Error searching jobs:', error);
     }
@@ -41,7 +43,7 @@ function App() {
   const draftEmail = async (job: Job, index: number) => {
     setDraftingJobId(index);
     try {
-      const response = await fetch('http://localhost:4000/draft', {
+      const response = await fetch('http://localhost:8000/email/draft', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,6 +124,12 @@ function App() {
             onSearch={searchJobs}
             loading={loading}
           />
+
+          {message && (
+            <div className="message">
+              {message}
+            </div>
+          )}
 
           {jobs.length > 0 && (
             <div className="jobs-section">

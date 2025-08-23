@@ -24,14 +24,9 @@ services:
     read_timeout: 60000
     write_timeout: 60000
     routes:
-      - name: job-search-route
-        paths: ["/jobs/search"]
-        strip_path: false
-        methods: ["GET", "POST", "OPTIONS"]
-        regex_priority: 1
       - name: job-route
         paths: ["/jobs"]
-        strip_path: true
+        strip_path: false
         methods: ["GET", "POST", "OPTIONS"]
 
   - name: email-service

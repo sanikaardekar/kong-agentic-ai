@@ -316,6 +316,17 @@ h1 {
   }
 }
 
+.message {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #21262d;
+  border: 1px solid #ff4500;
+  border-radius: 6px;
+  color: #e6edf3;
+  text-align: center;
+  font-size: 1rem;
+}
+
 @media (max-width: 768px) {
   .form-row {
     flex-wrap: wrap;
