@@ -2,7 +2,6 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import { generateEmail } from "./services/ollama.js";
-import { findCompanyEmails, generatePossibleEmails } from "./services/emailFinder.js";
 import { DraftEmailSchema } from "./schemas/validation.js";
 
 const app = express();
@@ -22,7 +21,6 @@ app.post("/draft", async (req, res) => {
     const { jobTitle, companyName, jobDescription, applyUrl, location, userProfile, source } = parsed.data;
 
     try {
-      // Generate email content
       const emailText = await generateEmail(
         jobTitle,
         companyName,
@@ -32,24 +30,10 @@ app.post("/draft", async (req, res) => {
         applyUrl
       );
 
-      // Find company emails
-      const emailData = await findCompanyEmails(companyName);
-      
-      // Generate fallback emails if no domain found
-      const fallbackEmails = emailData.domain ? 
-        generatePossibleEmails(companyName, emailData.domain) : [];
-
       res.json({ 
         success: true,
         emailSubject: `Application for ${jobTitle} at ${companyName}`,
         emailText,
-        companyEmails: {
-          hrEmails: emailData.hrEmails,
-          recruitingEmails: emailData.recruitingEmails,
-          allEmails: emailData.emails,
-          fallbackEmails: fallbackEmails,
-          domain: emailData.domain
-        },
         jobDetails: {
           title: jobTitle,
           company: companyName,

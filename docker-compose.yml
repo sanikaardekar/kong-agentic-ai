@@ -19,7 +19,6 @@ services:
       - NODE_ENV=production
       - OLLAMA_URL=http://host.docker.internal:11434
       - OLLAMA_MODEL=llama2
-      - HUNTER_API_KEY=${HUNTER_API_KEY}
 
   kong:
     image: kong:3.9
