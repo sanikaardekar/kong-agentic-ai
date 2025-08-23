@@ -1,10 +1,10 @@
-export type Source = "greenhouse" | "lever";
+export type Source = "greenhouse" | "lever" | "indeed" | "naukri";
 
 export interface NormalizedJob {
   id: string;
   title: string;
   company: string;
-  location?: string;
+  location: string;
   remote?: boolean;
   applyUrl?: string;
   descriptionHtml?: string;

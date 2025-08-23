@@ -8,6 +8,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - SERPAPI_KEY=${SERPAPI_KEY}
 
   email-service:
     build: ./email-service
