@@ -33,7 +33,8 @@ Write a professional email that:
 4. ${applyUrl ? "References where you found this opportunity naturally (e.g., 'I came across this position on [platform]' or 'I found this role through [source]')" : ""}
 5. Keeps it concise but engaging (under 200 words)
 6. Uses a professional but friendly tone
-7. Ends with signature including placeholders for:
+7. Do NOT use any emojis in the email
+8. Ends with signature including placeholders for:
    - [Your Name]
    - LinkedIn: [LinkedIn Profile URL]
    - GitHub: [GitHub Profile URL] (for technical roles)
