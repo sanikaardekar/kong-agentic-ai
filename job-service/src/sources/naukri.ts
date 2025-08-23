@@ -1,5 +1,6 @@
 import axios from "axios";
 import { normalizeNaukriJob } from "../normalize.js";
+import { retryWithBackoff, createAxiosConfig } from "../utils/retryHelper.js";
 import type { NormalizedJob } from "../types.js";
 
 /**
@@ -30,21 +31,28 @@ export async function fetchNaukriJobs(jobRole: string, location: string, experie
       num: 10
     };
 
-    const { data } = await axios.get(url, { params, timeout: 15000 });
-    const results = data.organic_results || [];
-    
-    // Filter and format Naukri results
-    const naukriJobs = results
-      .filter((result: any) => result.link && result.link.includes('naukri.com'))
-      .map((result: any) => ({
-        title: result.title,
-        company: extractCompanyFromTitle(result.title),
-        location: location,
-        description: result.snippet,
-        link: result.link
-      }));
-    
-    return naukriJobs.map((job: any) => normalizeNaukriJob(job, jobRole));
+    return retryWithBackoff(async () => {
+      const config = createAxiosConfig();
+      const { data } = await axios.get(url, { ...config, params, timeout: 15000 });
+      const results = data.organic_results || [];
+      
+      if (!results.length) {
+        throw new Error("No Naukri results found");
+      }
+      
+      // Filter and format Naukri results
+      const naukriJobs = results
+        .filter((result: any) => result.link && result.link.includes('naukri.com'))
+        .map((result: any) => ({
+          title: result.title,
+          company: extractCompanyFromTitle(result.title),
+          location: location,
+          description: result.snippet,
+          link: result.link
+        }));
+      
+      return naukriJobs.map((job: any) => normalizeNaukriJob(job, jobRole));
+    }, 3, 2000);
   } catch (error) {
     console.error("Naukri SerpAPI error:", error);
     return [];

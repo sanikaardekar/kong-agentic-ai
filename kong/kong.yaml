@@ -1,37 +1,81 @@
 _format_version: "3.0"
 _transform: true
 
+upstreams:
+  - name: job-service-upstream
+    algorithm: round-robin
+    healthchecks:
+      active:
+        healthy:
+          interval: 10
+          successes: 3
+        unhealthy:
+          interval: 10
+          http_failures: 3
+    targets:
+      - target: job-service:3000
+        weight: 100
+
 services:
   - name: job-service
-    url: http://job-service:3000
+    host: job-service-upstream
+    retries: 3
+    connect_timeout: 5000
+    read_timeout: 60000
+    write_timeout: 60000
     routes:
-      - name: job-service-route
+      - name: job-route
         paths: ["/jobs"]
-        strip_path: false
-        methods: ["GET"]
-        plugins:
-          - name: rate-limiting
-            config:
-              minute: 60
-              policy: local
-              limit_by: ip
+        strip_path: true
+        methods: ["GET", "POST"]
 
   - name: email-service
     url: http://email-service:4000
     routes:
-      - name: email-service-route
+      - name: email-route
         paths: ["/email"]
         strip_path: true
-        methods: ["POST"]
-        plugins:
-          - name: key-auth
-          - name: rate-limiting
-            config:
-              minute: 20
-              policy: local
-              limit_by: consumer
+        methods: ["GET", "POST"]
+
+plugins:
+  - name: key-auth
+    service: job-service
+    config:
+      key_names: ["apikey"]
+  - name: key-auth
+    service: email-service
+    config:
+      key_names: ["apikey"]
+  - name: rate-limiting
+    service: email-service
+    config:
+      minute: 20
+      policy: local
+      fault_tolerant: true
+  - name: proxy-cache
+    service: job-service
+    config:
+      response_code: [200]
+      request_method: ["POST"]
+      content_type: ["application/json"]
+      cache_ttl: 300
+      strategy: memory
+  - name: request-transformer
+    service: job-service
+    config:
+      add:
+        headers:
+          - "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+          - "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+  - name: response-transformer
+    service: job-service
+    config:
+      remove:
+        headers:
+          - "X-Kong-Upstream-Latency"
+          - "X-Kong-Proxy-Latency"
 
 consumers:
-  - username: email-user
+  - username: hackathon-user
     keyauth_credentials:
-      - key: demo-key-123
+      - key: hackathon-2024-key
