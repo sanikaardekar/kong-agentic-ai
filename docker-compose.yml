@@ -17,11 +17,9 @@ services:
       - "4000:4000"
     environment:
       - NODE_ENV=production
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
-      - SMTP_PORT=${SMTP_PORT:-587}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASS=${SMTP_PASS}
+      - OLLAMA_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=llama2
+      - HUNTER_API_KEY=${HUNTER_API_KEY}
 
   kong:
     image: kong:3.9
