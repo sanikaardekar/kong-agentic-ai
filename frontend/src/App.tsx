@@ -17,11 +17,13 @@ function App() {
   const [message, setMessage] = useState<string | null>(null);
   const [draftedEmail, setDraftedEmail] = useState<DraftedEmail | null>(null);
   const [draftingJobId, setDraftingJobId] = useState<number | null>(null);
+  const [currentJob, setCurrentJob] = useState<Job | null>(null);
   const [emailPanelWidth, setEmailPanelWidth] = useState(500);
   const [isResizing, setIsResizing] = useState(false);
 
   const searchJobs = async () => {
     setLoading(true);
+    setDraftedEmail(null); // Clear email panel when searching
     try {
       const response = await fetch('http://localhost:8000/jobs', {
         method: 'POST',
@@ -42,6 +44,7 @@ function App() {
 
   const draftEmail = async (job: Job, index: number) => {
     setDraftingJobId(index);
+    setCurrentJob(job);
     try {
       const response = await fetch('http://localhost:8000/email/draft', {
         method: 'POST',
@@ -104,6 +107,8 @@ function App() {
           <>
             <EmailDraft 
               draftedEmail={draftedEmail}
+              jobTitle={currentJob?.title || ''}
+              companyName={currentJob?.company || ''}
               onClose={() => setDraftedEmail(null)}
             />
             <div 

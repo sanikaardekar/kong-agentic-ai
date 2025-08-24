@@ -133,39 +133,7 @@ async function handleSearch(req: any, res: any) {
         console.log("Naukri fetch failed:", err);
       }
 
-      // Fetch from popular companies on Greenhouse/Lever (parallel)
-      const popularCompanies = ['airbnb', 'stripe', 'shopify', 'netflix'];
-      
-      const companyPromises = popularCompanies.map(async (companyName) => {
-        const jobs: NormalizedJob[] = [];
-        try {
-          const greenhouseJobs = await fetchGreenhouseJobs(companyName);
-          const filtered = greenhouseJobs.filter(job => 
-            job.title.toLowerCase().includes(jobRole.toLowerCase())
-          );
-          jobs.push(...filtered);
-        } catch (err) {
-          // Silently continue
-        }
-
-        try {
-          const leverJobs = await fetchLeverJobs(companyName);
-          const filtered = leverJobs.filter(job => 
-            job.title.toLowerCase().includes(jobRole.toLowerCase())
-          );
-          jobs.push(...filtered);
-        } catch (err) {
-          // Silently continue
-        }
-        return jobs;
-      });
-      
-      const companyResults = await Promise.allSettled(companyPromises);
-      companyResults.forEach(result => {
-        if (result.status === 'fulfilled') {
-          allJobs.push(...result.value);
-        }
-      });
+      // Only fetch from job boards (Indeed/Naukri) for general searches
       
       console.log(`Found ${allJobs.length} total jobs from all sources`);
     }
@@ -175,8 +143,18 @@ async function handleSearch(req: any, res: any) {
       index === self.findIndex(j => j.title === job.title && j.company === job.company)
     );
 
+    // Sort by location priority: exact matches first, then others
+    const sortedJobs = uniqueJobs.sort((a, b) => {
+      const aLocationMatch = a.location.toLowerCase().includes(location.toLowerCase());
+      const bLocationMatch = b.location.toLowerCase().includes(location.toLowerCase());
+      
+      if (aLocationMatch && !bLocationMatch) return -1;
+      if (!aLocationMatch && bLocationMatch) return 1;
+      return 0;
+    });
+
     // Format for frontend with full job descriptions
-    const formattedJobs = uniqueJobs.map(job => ({
+    const formattedJobs = sortedJobs.map(job => ({
       id: job.id,
       title: job.title,
       company: job.company,

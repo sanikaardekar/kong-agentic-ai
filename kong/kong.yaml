@@ -34,8 +34,8 @@ services:
     routes:
       - name: email-route
         paths: ["/email"]
-        strip_path: true
-        methods: ["GET", "POST"]
+        strip_path: false
+        methods: ["GET", "POST", "OPTIONS"]
 
 plugins:
   - name: cors
