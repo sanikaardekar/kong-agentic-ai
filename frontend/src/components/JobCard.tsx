@@ -14,9 +14,10 @@ interface JobCardProps {
   index: number;
   onDraftEmail: (job: Job, index: number) => void;
   draftingJobId: number | null;
+  onFindEmails: (company: string) => void;
 }
 
-export const JobCard: React.FC<JobCardProps> = ({ job, index, onDraftEmail, draftingJobId }) => {
+export const JobCard: React.FC<JobCardProps> = ({ job, index, onDraftEmail, draftingJobId, onFindEmails }) => {
   return (
     <div className="job-card">
       <div className="job-header">
@@ -38,6 +39,12 @@ export const JobCard: React.FC<JobCardProps> = ({ job, index, onDraftEmail, draf
           className="draft-btn"
         >
           {draftingJobId === index ? 'Drafting...' : 'Draft Email'}
+        </button>
+        <button 
+          onClick={() => onFindEmails(job.company)}
+          className="find-emails-btn"
+        >
+          Get Recruiter Emails
         </button>
       </div>
     </div>

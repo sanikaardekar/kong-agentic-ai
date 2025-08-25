@@ -1,24 +1,9 @@
 _format_version: "3.0"
 _transform: true
 
-upstreams:
-  - name: job-service-upstream
-    algorithm: round-robin
-    healthchecks:
-      active:
-        healthy:
-          interval: 10
-          successes: 3
-        unhealthy:
-          interval: 10
-          http_failures: 3
-    targets:
-      - target: job-service:3000
-        weight: 100
-
 services:
   - name: job-service
-    host: job-service-upstream
+    url: http://job-service:3000
     retries: 3
     connect_timeout: 5000
     read_timeout: 60000
@@ -37,6 +22,14 @@ services:
         strip_path: false
         methods: ["GET", "POST", "OPTIONS"]
 
+  - name: email-finder-service
+    url: http://email-finder-service:5000
+    routes:
+      - name: email-finder-route
+        paths: ["/emails"]
+        strip_path: false
+        methods: ["GET", "POST", "OPTIONS"]
+
 plugins:
   - name: cors
     config:
@@ -52,6 +45,10 @@ plugins:
       key_names: ["apikey"]
   - name: key-auth
     service: email-service
+    config:
+      key_names: ["apikey"]
+  - name: key-auth
+    service: email-finder-service
     config:
       key_names: ["apikey"]
   - name: rate-limiting

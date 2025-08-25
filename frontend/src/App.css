@@ -224,6 +224,137 @@ h1 {
   cursor: not-allowed;
 }
 
+.find-emails-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s;
+  font-size: 12px;
+  background: #6f42c1;
+  color: white;
+}
+
+.find-emails-btn:hover {
+  opacity: 0.8;
+}
+
+.email-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.email-popup {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #30363d;
+  background: #161b22;
+}
+
+.popup-header h3 {
+  margin: 0;
+  color: #e6edf3;
+  font-size: 16px;
+}
+
+.popup-content {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.loading, .error, .no-emails {
+  text-align: center;
+  padding: 20px;
+  color: #7d8590;
+}
+
+.error {
+  color: #f85149;
+}
+
+.emails-count {
+  margin: 0 0 16px 0;
+  color: #e6edf3;
+  font-size: 14px;
+}
+
+.email-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.email-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.email-address {
+  color: #e6edf3;
+  font-size: 14px;
+  font-family: monospace;
+}
+
+.confidence-badge, .source-badge {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.source-badge {
+  background: #238636;
+  color: white;
+}
+
+.copy-email-btn {
+  background: #ff4500;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.copy-email-btn:hover {
+  opacity: 0.8;
+}
+
 .email-section {
   background: #21262d;
   border-radius: 6px;

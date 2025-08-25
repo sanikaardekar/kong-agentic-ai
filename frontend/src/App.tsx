@@ -3,6 +3,7 @@ import './App.css';
 import { SearchForm } from './components/SearchForm';
 import { JobCard } from './components/JobCard';
 import { EmailDraft } from './components/EmailDraft';
+import { EmailPopup } from './components/EmailPopup';
 import { Job, JobSearchForm, DraftedEmail } from './types';
 
 function App() {
@@ -20,6 +21,8 @@ function App() {
   const [currentJob, setCurrentJob] = useState<Job | null>(null);
   const [emailPanelWidth, setEmailPanelWidth] = useState(500);
   const [isResizing, setIsResizing] = useState(false);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<string>('');
 
   const searchJobs = async () => {
     setLoading(true);
@@ -68,6 +71,16 @@ function App() {
       console.error('Error drafting email:', error);
     }
     setDraftingJobId(null);
+  };
+
+  const handleFindEmails = (company: string) => {
+    setSelectedCompany(company);
+    setShowEmailPopup(true);
+  };
+
+  const handleCopyEmail = (email: string) => {
+    navigator.clipboard.writeText(email);
+    alert(`Email copied: ${email}`);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -146,12 +159,21 @@ function App() {
                   index={index}
                   onDraftEmail={draftEmail}
                   draftingJobId={draftingJobId}
+                  onFindEmails={handleFindEmails}
                 />
               ))}
             </div>
           )}
         </div>
       </div>
+      
+      {showEmailPopup && (
+        <EmailPopup
+          company={selectedCompany}
+          onClose={() => setShowEmailPopup(false)}
+          onCopyEmail={handleCopyEmail}
+        />
+      )}
     </div>
   );
 }
