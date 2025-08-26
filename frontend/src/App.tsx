@@ -3,7 +3,22 @@ import './App.css';
 import { SearchForm } from './components/SearchForm';
 import { JobCard } from './components/JobCard';
 import { EmailDraft } from './components/EmailDraft';
+import { EmailList } from './components/EmailList';
 import { Job, JobSearchForm, DraftedEmail } from './types';
+
+interface EmailResult {
+  email: string;
+  name: string;
+  title: string;
+  verified: boolean;
+  verifaliaStatus?: string;
+}
+
+interface FetchedEmails {
+  jobTitle: string;
+  companyName: string;
+  emails: EmailResult[];
+}
 
 function App() {
   const [form, setForm] = useState<JobSearchForm>({
@@ -17,6 +32,8 @@ function App() {
   const [message, setMessage] = useState<string | null>(null);
   const [draftedEmail, setDraftedEmail] = useState<DraftedEmail | null>(null);
   const [draftingJobId, setDraftingJobId] = useState<number | null>(null);
+  const [fetchingEmailsJobId, setFetchingEmailsJobId] = useState<number | null>(null);
+  const [fetchedEmails, setFetchedEmails] = useState<FetchedEmails | null>(null);
   const [currentJob, setCurrentJob] = useState<Job | null>(null);
   const [emailPanelWidth, setEmailPanelWidth] = useState(500);
   const [isResizing, setIsResizing] = useState(false);
@@ -70,6 +87,37 @@ function App() {
     setDraftingJobId(null);
   };
 
+  const fetchEmails = async (job: Job, index: number) => {
+    setFetchingEmailsJobId(index);
+    try {
+      const response = await fetch('http://localhost:8000/emails/job', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'hackathon-2024-key'
+        },
+        body: JSON.stringify({
+          jobId: `job_${index}`,
+          company: job.company,
+          title: job.title,
+          location: job.location
+        })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setFetchedEmails({
+          jobTitle: job.title,
+          companyName: job.company,
+          emails: data.emails || []
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching emails:', error);
+    }
+    setFetchingEmailsJobId(null);
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsResizing(true);
     e.preventDefault();
@@ -119,6 +167,15 @@ function App() {
         )}
       </div>
       
+      {fetchedEmails && (
+        <EmailList 
+          emails={fetchedEmails.emails}
+          jobTitle={fetchedEmails.jobTitle}
+          companyName={fetchedEmails.companyName}
+          onClose={() => setFetchedEmails(null)}
+        />
+      )}
+      
       <div className="main-panel">
         <div className="container">
           <h1>Job Helper Agent</h1>
@@ -145,7 +202,9 @@ function App() {
                   job={job}
                   index={index}
                   onDraftEmail={draftEmail}
+                  onFetchEmails={fetchEmails}
                   draftingJobId={draftingJobId}
+                  fetchingEmailsJobId={fetchingEmailsJobId}
                 />
               ))}
             </div>

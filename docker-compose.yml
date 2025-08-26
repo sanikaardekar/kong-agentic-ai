@@ -20,12 +20,23 @@ services:
       - OLLAMA_URL=http://host.docker.internal:11434
       - OLLAMA_MODEL=llama2
 
+  email-address-service:
+    build: ./email-address-service
+    container_name: email-address-service
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - SERPAPI_KEY=${SERPAPI_KEY}
+      - VERIFALIA_API_KEY=${VERIFALIA_API_KEY}
+
   kong:
     image: kong:3.9
     container_name: kong-gateway
     depends_on:
       - job-service
       - email-service
+      - email-address-service
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yaml

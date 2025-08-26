@@ -13,10 +13,12 @@ interface JobCardProps {
   job: Job;
   index: number;
   onDraftEmail: (job: Job, index: number) => void;
+  onFetchEmails: (job: Job, index: number) => void;
   draftingJobId: number | null;
+  fetchingEmailsJobId: number | null;
 }
 
-export const JobCard: React.FC<JobCardProps> = ({ job, index, onDraftEmail, draftingJobId }) => {
+export const JobCard: React.FC<JobCardProps> = ({ job, index, onDraftEmail, onFetchEmails, draftingJobId, fetchingEmailsJobId }) => {
   return (
     <div className="job-card">
       <div className="job-header">
@@ -38,6 +40,13 @@ export const JobCard: React.FC<JobCardProps> = ({ job, index, onDraftEmail, draf
           className="draft-btn"
         >
           {draftingJobId === index ? 'Drafting...' : 'Draft Email'}
+        </button>
+        <button 
+          onClick={() => onFetchEmails(job, index)}
+          disabled={fetchingEmailsJobId === index}
+          className="emails-btn"
+        >
+          {fetchingEmailsJobId === index ? 'Fetching...' : 'Emails from Company'}
         </button>
       </div>
     </div>
