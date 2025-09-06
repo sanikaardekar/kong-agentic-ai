@@ -4,6 +4,7 @@ import { SearchForm } from './components/SearchForm';
 import { JobCard } from './components/JobCard';
 import { EmailDraft } from './components/EmailDraft';
 import { EmailPopup } from './components/EmailPopup';
+import { AgentChat } from './components/AgentChat';
 import { Job, JobSearchForm, DraftedEmail } from './types';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
   const [isResizing, setIsResizing] = useState(false);
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<string>('');
+  const [agentResponse, setAgentResponse] = useState<string>('');
 
   const searchJobs = async () => {
     setLoading(true);
@@ -83,6 +85,10 @@ function App() {
     alert(`Email copied: ${email}`);
   };
 
+  const handleAgentResponse = (response: string) => {
+    setAgentResponse(response);
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsResizing(true);
     e.preventDefault();
@@ -134,14 +140,67 @@ function App() {
       
       <div className="main-panel">
         <div className="container">
-          <h1>Job Helper Agent</h1>
+          <h1>AI Job Assistant</h1>
           
-          <SearchForm 
-            form={form}
-            setForm={setForm}
-            onSearch={searchJobs}
-            loading={loading}
-          />
+          <AgentChat onResponse={handleAgentResponse} />
+          
+          {agentResponse && (
+            <div className="agent-response">
+              <h3>Assistant Response:</h3>
+              <div className="response-content">
+                {agentResponse.split('\n').map((line, index) => {
+                  // Check if line contains a URL
+                  const urlRegex = /(https?:\/\/[^\s]+)/;
+                  const match = line.match(urlRegex);
+                  
+                  if (match) {
+                    const url = match[1];
+                    const parts = line.split(url);
+                    return (
+                      <div key={index} style={{ marginBottom: '4px' }}>
+                        {parts[0]}
+                        <a 
+                          href={url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="job-link"
+                          style={{
+                            backgroundColor: '#ff4500',
+                            color: 'white',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            textDecoration: 'none',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            marginLeft: '8px'
+                          }}
+                        >
+                          Apply Here
+                        </a>
+                        {parts[1]}
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div key={index} style={{ marginBottom: '4px' }}>
+                      {line || '\u00A0'}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          
+          <div className="manual-search">
+            <h3>Manual Search (Optional)</h3>
+            <SearchForm 
+              form={form}
+              setForm={setForm}
+              onSearch={searchJobs}
+              loading={loading}
+            />
+          </div>
 
           {message && (
             <div className="message">

@@ -30,6 +30,14 @@ services:
         strip_path: false
         methods: ["GET", "POST", "OPTIONS"]
 
+  - name: agent-service
+    url: http://agent-service:6000
+    routes:
+      - name: agent-route
+        paths: ["/chat"]
+        strip_path: false
+        methods: ["GET", "POST", "OPTIONS"]
+
 plugins:
   - name: cors
     config:
@@ -49,6 +57,10 @@ plugins:
       key_names: ["apikey"]
   - name: key-auth
     service: email-finder-service
+    config:
+      key_names: ["apikey"]
+  - name: key-auth
+    service: agent-service
     config:
       key_names: ["apikey"]
   - name: rate-limiting

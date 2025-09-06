@@ -28,6 +28,15 @@ services:
       - HUNTER_API_KEY=${HUNTER_API_KEY}
       - CLEARBIT_API_KEY=${CLEARBIT_API_KEY}
 
+  agent-service:
+    build: ./agent-service
+    container_name: agent-service
+    ports:
+      - "6000:6000"
+    environment:
+      - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+
   kong:
     image: kong:3.9
     container_name: kong-gateway
@@ -35,6 +44,7 @@ services:
       - job-service
       - email-service
       - email-finder-service
+      - agent-service
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yaml
