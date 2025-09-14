@@ -54,9 +54,9 @@ graph TB
 ## 🚀 Features
 
 ### 🎯 AI Agent Capabilities
-- **Natural Language Processing**: Understands user intents from conversational input
-- **Tool Selection**: Automatically chooses appropriate tools based on user requests
-- **Multi-step Reasoning**: Can chain multiple actions to complete complex tasks
+- **Natural Language Processing**: Understands user intents using Cloudflare AI (Llama 3.3 70B)
+- **Intent Detection**: Smart pattern matching to determine user requests
+- **Tool Execution**: Automatically executes appropriate tools (job search, email finder, email drafting)
 
 ### 🔍 Job Search
 - **Multi-platform Search**: Searches across Indeed, Naukri, and other job platforms
@@ -65,8 +65,8 @@ graph TB
 
 ### 📧 Email Intelligence
 - **Recruiter Email Discovery**: Finds recruiter emails using Google search and Hunter.io
-- **Professional Email Drafting**: AI-generated personalized application emails
-- **Copy-to-Clipboard**: Easy email copying functionality
+- **AI-Powered Email Drafting**: Cloudflare AI generates personalized application emails
+- **Clickable Apply Links**: Direct links to job applications
 
 ### 🛡️ Security & Performance
 - **API Gateway**: Kong-based routing with API key authentication
@@ -82,9 +82,9 @@ graph TB
 | **API Gateway** | Kong | Request routing, authentication, rate limiting |
 | **Agent Service** | Python + FastAPI + LangChain | AI agent orchestration |
 | **Job Service** | Node.js + Express | Job search and aggregation |
-| **Email Service** | Node.js + Express | Email drafting |
+| **Email Service** | Node.js + Express + Cloudflare AI | Email drafting |
 | **Email Finder** | Node.js + Express | Recruiter email discovery |
-| **LLM** | Cloudflare AI (Llama 3.3 70B) | Natural language processing |
+| **LLM** | Cloudflare AI (Llama 3.3 70B) | Natural language processing & email generation |
 | **Intent Detection** | Python Regex + LangChain | User intent classification |
 | **Containerization** | Docker + Docker Compose | Deployment and orchestration |
 
@@ -145,6 +145,36 @@ npm start
 - **Frontend**: http://localhost:3001
 - **API Gateway**: http://localhost:8000
 - **Health Checks**: http://localhost:8000/health
+
+## 🚀 Quick Commands
+
+### Start Everything
+```bash
+# Start all backend services
+docker-compose up
+
+# Start frontend (new terminal)
+cd frontend
+npm start
+```
+
+### View Logs
+```bash
+# All services
+docker-compose logs -f
+
+# Agent service only
+docker-compose logs -f agent-service
+
+# Real-time agent thinking
+docker-compose logs -f agent-service | grep "🤖\|🎯\|🔍\|📧\|✏️"
+```
+
+### Test Commands
+Try these in the AI chat at http://localhost:3001:
+- `"Find React jobs in Mumbai"`
+- `"Get recruiter emails for Google"`
+- `"Draft email for software engineer position"`
 
 ## 💬 Usage Examples
 
@@ -318,8 +348,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 # Check Cloudflare credentials
 docker-compose logs agent-service | grep "CLOUDFLARE"
 
+# Check agent service logs
+docker-compose logs --tail=20 agent-service
+
 # Restart agent service
 docker-compose restart agent-service
+```
+
+**Email drafting not working:**
+```bash
+# Check email service logs
+docker-compose logs --tail=20 email-service
+
+# Restart email service
+docker-compose restart email-service
 ```
 
 **No jobs found:**
@@ -360,4 +402,11 @@ For support and questions:
 
 ---
 
-**Built with ❤️ using Kong, LangChain, and Cloudflare AI**
+**Built with ❤️ using Kong Gateway, LangChain, and Cloudflare AI (Llama 3.3 70B)**
+
+### 🔧 Architecture Summary
+- **Frontend**: React TypeScript application
+- **API Gateway**: Kong with authentication and rate limiting
+- **Agent Service**: Python FastAPI with LangChain and Cloudflare AI
+- **Microservices**: Node.js services for jobs, emails, and email finding
+- **AI Model**: Cloudflare AI Llama 3.3 70B for natural language processing

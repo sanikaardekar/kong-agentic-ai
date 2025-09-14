@@ -1,7 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import { generateEmail, refineEmail } from "./services/ollama.js";
+import { generateEmail, refineEmail } from "./services/cloudflare.js";
 import { DraftEmailSchema } from "./schemas/validation.js";
 
 const app = express();
@@ -18,7 +18,7 @@ app.post("/email/draft", async (req, res) => {
       return res.status(400).json({ error: parsed.error.flatten() });
     }
 
-    const { jobTitle, companyName, jobDescription, applyUrl, location, userProfile, source } = parsed.data;
+    const { jobTitle, companyName, jobDescription, applyUrl, location, userProfile, source, userPrompt } = parsed.data;
 
     try {
       const emailText = await generateEmail(
@@ -27,7 +27,8 @@ app.post("/email/draft", async (req, res) => {
         jobDescription,
         userProfile,
         location,
-        applyUrl
+        applyUrl,
+        userPrompt
       );
 
       res.json({ 
@@ -42,12 +43,12 @@ app.post("/email/draft", async (req, res) => {
           source: source
         }
       });
-    } catch (ollamaError) {
-      console.error("Ollama Error:", ollamaError);
+    } catch (aiError) {
+      console.error("Cloudflare AI Error:", aiError);
       return res.status(500).json({ 
         success: false, 
         error: "Failed to generate email content", 
-        details: (ollamaError as any)?.message || "Ollama API error" 
+        details: (aiError as any)?.message || "AI API error" 
       });
     }
   } catch (err: any) {

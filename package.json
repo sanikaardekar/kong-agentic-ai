@@ -1,7 +1,7 @@
 {
-  "name": "cold-email-agent",
+  "name": "kong-agentic-ai",
   "version": "1.0.0",
-  "description": "AI-powered cold email agent with Kong Gateway integration",
+  "description": "AI-powered job search assistant using Cloudflare AI and Kong Gateway",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

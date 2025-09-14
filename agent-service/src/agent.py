@@ -51,12 +51,17 @@ def determine_intent_and_execute(user_input: str) -> str:
     elif any(word in user_input_lower for word in ['draft email', 'write email', 'compose email']):
         print("🎯 [INTENT] Detected: EMAIL_DRAFT")
         
+        # Extract job details from user input
+        company_match = re.search(r'(?:for|at)\s+(\w+)', user_input_lower)
+        role_match = re.search(r'(\w+)\s+(?:engineer|developer|position|job|role)', user_input_lower)
+        
         params = {
-            "jobTitle": "Software Engineer",
-            "companyName": "Tech Company",
-            "location": "Mumbai",
-            "jobDescription": "Software development position",
-            "applyUrl": "https://example.com"
+            "jobTitle": role_match.group(1).title() + " Engineer" if role_match else "Software Engineer",
+            "companyName": company_match.group(1).title() if company_match else "Tech Company",
+            "location": "Remote",
+            "jobDescription": f"Exciting opportunity for {role_match.group(1) if role_match else 'software'} development",
+            "applyUrl": "https://company-careers.com",
+            "userPrompt": user_input  # Pass original prompt for context
         }
         
         return tools["draft_email"].func(json.dumps(params))
