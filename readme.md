@@ -23,7 +23,6 @@ graph TB
     
     subgraph "AI/LLM Layer"
         CF[Cloudflare AI<br/>Llama 3.3 70B]
-        OLLAMA[Ollama<br/>Local LLM<br/>Optional]
     end
     
     subgraph "External APIs"
@@ -40,7 +39,6 @@ graph TB
     KONG --> FINDER
     
     AGENT --> CF
-    EMAIL --> OLLAMA
     
     JOB --> INDEED
     JOB --> NAUKRI
@@ -87,14 +85,24 @@ graph TB
 | **Email Service** | Node.js + Express | Email drafting |
 | **Email Finder** | Node.js + Express | Recruiter email discovery |
 | **LLM** | Cloudflare AI (Llama 3.3 70B) | Natural language processing |
+| **Intent Detection** | Python Regex + LangChain | User intent classification |
 | **Containerization** | Docker + Docker Compose | Deployment and orchestration |
 
 ## 📋 Prerequisites
 
 - Docker & Docker Compose
 - Node.js 18+ (for frontend development)
-- Cloudflare AI account
+- Cloudflare AI account (required)
 - API keys for external services (optional but recommended)
+
+### 🔑 API Key Sources
+
+| Service | Purpose | Free Tier | URL |
+|---------|---------|-----------|-----|
+| **Cloudflare AI** | LLM Processing | ✅ Yes | https://dash.cloudflare.com |
+| **SerpAPI** | Google Search | ✅ 100 searches/month | https://serpapi.com |
+| **Hunter.io** | Email Discovery | ✅ 25 searches/month | https://hunter.io |
+| **Clearbit** | Company Data | ✅ 50 requests/month | https://clearbit.com |
 
 ## ⚡ Quick Start
 
@@ -116,10 +124,10 @@ Required environment variables:
 CLOUDFLARE_ACCOUNT_ID=your_account_id
 CLOUDFLARE_API_TOKEN=your_api_token
 
-# Optional API Keys (for enhanced functionality)
-SERPAPI_KEY=your_serpapi_key
-HUNTER_API_KEY=your_hunter_api_key
-CLEARBIT_API_KEY=your_clearbit_api_key
+# External APIs (Optional - for enhanced functionality)
+SERPAPI_KEY=your_serpapi_key          # For Google search-based email finding
+HUNTER_API_KEY=your_hunter_api_key    # For professional email discovery
+CLEARBIT_API_KEY=your_clearbit_api_key # For company domain lookup
 ```
 
 ### 3. Start Services

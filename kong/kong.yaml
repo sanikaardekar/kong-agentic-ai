@@ -37,6 +37,18 @@ services:
         paths: ["/chat"]
         strip_path: false
         methods: ["GET", "POST", "OPTIONS"]
+      - name: agent-health-route
+        paths: ["/agent/health"]
+        strip_path: true
+        methods: ["GET"]
+
+  - name: health-service
+    url: http://agent-service:6000
+    routes:
+      - name: health-route
+        paths: ["/health"]
+        strip_path: false
+        methods: ["GET"]
 
 plugins:
   - name: cors
