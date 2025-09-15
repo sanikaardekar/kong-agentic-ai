@@ -86,8 +86,9 @@ def process_user_input(user_input: str) -> str:
             result_data = json.loads(result)
             if result_data.get('success'):
                 if 'jobs' in result_data:
-                    jobs = result_data['jobs'][:10]  # Show top 10
-                    response = f"Found {result_data.get('totalJobs', 0)} jobs! Here are the matches:\n\n"
+                    jobs = result_data['jobs']  # Show all jobs
+                    total_jobs = result_data.get('totalJobs', len(jobs))
+                    response = f"Found {total_jobs} jobs! Here are the matches:\n\n"
                     for i, job in enumerate(jobs, 1):
                         apply_url = job.get('applyUrl', '#')
                         response += f"{i}. {job.get('title', 'N/A')} at {job.get('company', 'N/A')}\n   📍 {job.get('location', 'N/A')}\n   🔗 {apply_url}\n\n"

@@ -89,6 +89,34 @@ function App() {
     setAgentResponse(response);
   };
 
+  const handleDraftEmail = async (jobTitle: string, companyName: string) => {
+    try {
+      const response = await fetch('http://localhost:8000/email/draft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'hackathon-2024-key'
+        },
+        body: JSON.stringify({
+          jobTitle,
+          companyName,
+          jobDescription: `Exciting ${jobTitle} opportunity at ${companyName}`,
+          userProfile: "Software Engineer with experience in modern web technologies",
+          location: "Remote",
+          applyUrl: "https://company-careers.com"
+        })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setDraftedEmail(data);
+        setCurrentJob({ title: jobTitle, company: companyName } as Job);
+      }
+    } catch (error) {
+      console.error('Error drafting email:', error);
+    }
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsResizing(true);
     e.preventDefault();
@@ -148,46 +176,69 @@ function App() {
             <div className="agent-response">
               <h3>Assistant Response:</h3>
               <div className="response-content">
-                {agentResponse.split('\n').map((line, index) => {
-                  // Check if line contains a URL
-                  const urlRegex = /(https?:\/\/[^\s]+)/;
-                  const match = line.match(urlRegex);
+                {(() => {
+                  const lines = agentResponse.split('\n');
+                  const jobCards = [];
+                  const otherContent = [];
                   
-                  if (match) {
-                    const url = match[1];
-                    const parts = line.split(url);
-                    return (
-                      <div key={index} style={{ marginBottom: '4px' }}>
-                        {parts[0]}
-                        <a 
-                          href={url} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="job-link"
-                          style={{
-                            backgroundColor: '#ff4500',
-                            color: 'white',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            textDecoration: 'none',
-                            fontSize: '12px',
-                            fontWeight: 'bold',
-                            marginLeft: '8px'
-                          }}
-                        >
-                          Apply Here
-                        </a>
-                        {parts[1]}
-                      </div>
-                    );
+                  for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const jobMatch = line.match(/^(\d+)\. (.+?) at (.+?)(?:\s|$)/);
+                    
+                    if (jobMatch) {
+                      let jobUrl = '#';
+                      let location = 'Remote';
+                      
+                      for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
+                        const nextLine = lines[j];
+                        const urlMatch = nextLine.match(/(https?:\/\/[^\s]+)/);
+                        const locationMatch = nextLine.match(/📍\s*(.+)/);
+                        
+                        if (urlMatch) jobUrl = urlMatch[1];
+                        if (locationMatch) location = locationMatch[1];
+                      }
+                      
+                      const agentJob: Job = {
+                        title: jobMatch[2],
+                        company: jobMatch[3],
+                        location: location,
+                        applyUrl: jobUrl,
+                        jobDescription: `${jobMatch[2]} position at ${jobMatch[3]}`,
+                        source: 'AI Agent'
+                      };
+                      
+                      jobCards.push(
+                        <JobCard
+                          key={i}
+                          job={agentJob}
+                          index={i}
+                          onDraftEmail={(job, index) => handleDraftEmail(job.title, job.company)}
+                          draftingJobId={null}
+                          onFindEmails={handleFindEmails}
+                        />
+                      );
+                    } else if (!line.match(/(https?:\/\/[^\s]+)/) && !line.match(/📍/) && line.trim()) {
+                      otherContent.push(
+                        <div key={i} style={{ marginBottom: '4px' }}>
+                          {line}
+                        </div>
+                      );
+                    }
                   }
                   
                   return (
-                    <div key={index} style={{ marginBottom: '4px' }}>
-                      {line || '\u00A0'}
-                    </div>
+                    <>
+                      {otherContent}
+                      {jobCards.length > 0 && (
+                        <div className="jobs-section">
+                          <h2>Found {jobCards.length} Jobs</h2>
+                          {jobCards}
+                        </div>
+                      )}
+                    </>
                   );
-                })}
+                })()
+                }
               </div>
             </div>
           )}

@@ -20,7 +20,7 @@ def job_search_func(input_str: str) -> str:
         result = {
             "success": True,
             "totalJobs": data.get('totalJobs', 0),
-            "jobs": data.get('jobs', [])[:15],  # Show more jobs
+            "jobs": data.get('jobs', []),  # Show all available jobs
             "message": data.get('message')
         }
         
