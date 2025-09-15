@@ -28,7 +28,7 @@ function App() {
 
   const searchJobs = async () => {
     setLoading(true);
-    setDraftedEmail(null); // Clear email panel when searching
+    setDraftedEmail(null);
     try {
       const response = await fetch('http://localhost:8000/jobs', {
         method: 'POST',
@@ -192,7 +192,7 @@ function App() {
                       for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
                         const nextLine = lines[j];
                         const urlMatch = nextLine.match(/(https?:\/\/[^\s]+)/);
-                        const locationMatch = nextLine.match(/📍\s*(.+)/);
+                        const locationMatch = nextLine.match(/Location:\s*(.+)/);
                         
                         if (urlMatch) jobUrl = urlMatch[1];
                         if (locationMatch) location = locationMatch[1];
@@ -217,7 +217,7 @@ function App() {
                           onFindEmails={handleFindEmails}
                         />
                       );
-                    } else if (!line.match(/(https?:\/\/[^\s]+)/) && !line.match(/📍/) && line.trim()) {
+                    } else if (!line.match(/(https?:\/\/[^\s]+)/) && !line.match(/Location:/) && line.trim()) {
                       otherContent.push(
                         <div key={i} style={{ marginBottom: '4px' }}>
                           {line}

@@ -17,14 +17,11 @@ tools = {
 }
 
 def determine_intent_and_execute(user_input: str) -> str:
-    """Determine user intent and execute appropriate tool."""
     user_input_lower = user_input.lower()
     
-    # Job search patterns
     if any(word in user_input_lower for word in ['find jobs', 'search jobs', 'job search', 'jobs in', 'positions']):
-        print("🎯 [INTENT] Detected: JOB_SEARCH")
+        print("[INTENT] Detected: JOB_SEARCH")
         
-        # Extract parameters using simple regex
         role_match = re.search(r'(\w+)\s+(?:jobs|developer|engineer|position)', user_input_lower)
         location_match = re.search(r'in\s+(\w+)', user_input_lower)
         
@@ -36,22 +33,18 @@ def determine_intent_and_execute(user_input: str) -> str:
         
         return tools["job_search"].func(json.dumps(params))
     
-    # Email finder patterns
     elif any(word in user_input_lower for word in ['find emails', 'get emails', 'recruiter emails', 'contact']):
-        print("🎯 [INTENT] Detected: EMAIL_FINDER")
+        print("[INTENT] Detected: EMAIL_FINDER")
         
-        # Extract company name
         company_match = re.search(r'(?:for|at)\s+(\w+)', user_input_lower)
         company = company_match.group(1) if company_match else "google"
         
         params = {"company": company}
         return tools["find_emails"].func(json.dumps(params))
     
-    # Email draft patterns
     elif any(word in user_input_lower for word in ['draft email', 'write email', 'compose email']):
-        print("🎯 [INTENT] Detected: EMAIL_DRAFT")
+        print("[INTENT] Detected: EMAIL_DRAFT")
         
-        # Extract job details from user input
         company_match = re.search(r'(?:for|at)\s+(\w+)', user_input_lower)
         role_match = re.search(r'(\w+)\s+(?:engineer|developer|position|job|role)', user_input_lower)
         
@@ -61,7 +54,7 @@ def determine_intent_and_execute(user_input: str) -> str:
             "location": "Remote",
             "jobDescription": f"Exciting opportunity for {role_match.group(1) if role_match else 'software'} development",
             "applyUrl": "https://company-careers.com",
-            "userPrompt": user_input  # Pass original prompt for context
+            "userPrompt": user_input
         }
         
         return tools["draft_email"].func(json.dumps(params))
@@ -70,28 +63,26 @@ def determine_intent_and_execute(user_input: str) -> str:
         return "I can help you with: 1) Finding jobs 2) Getting recruiter emails 3) Drafting application emails. Please try: 'Find React jobs in Mumbai' or 'Get recruiter emails for Google'"
 
 def process_user_input(user_input: str) -> str:
-    """Process user input through simple intent detection."""
     print("\n" + "=" * 80)
-    print(f"🤖 [AGENT] New user request received: {user_input}")
+    print(f"[AGENT] New user request received: {user_input}")
     print("=" * 80)
     
     try:
-        print("🤖 [AGENT] Analyzing user intent...")
-        print(f"🤖 [AGENT] Available tools: {', '.join(tools.keys())}")
+        print("[AGENT] Analyzing user intent...")
+        print(f"[AGENT] Available tools: {', '.join(tools.keys())}")
         
         result = determine_intent_and_execute(user_input)
         
-        # Parse result and format response
         try:
             result_data = json.loads(result)
             if result_data.get('success'):
                 if 'jobs' in result_data:
-                    jobs = result_data['jobs']  # Show all jobs
+                    jobs = result_data['jobs']
                     total_jobs = result_data.get('totalJobs', len(jobs))
                     response = f"Found {total_jobs} jobs! Here are the matches:\n\n"
                     for i, job in enumerate(jobs, 1):
                         apply_url = job.get('applyUrl', '#')
-                        response += f"{i}. {job.get('title', 'N/A')} at {job.get('company', 'N/A')}\n   📍 {job.get('location', 'N/A')}\n   🔗 {apply_url}\n\n"
+                        response += f"{i}. {job.get('title', 'N/A')} at {job.get('company', 'N/A')}\n   Location: {job.get('location', 'N/A')}\n   URL: {apply_url}\n\n"
                 elif 'emails' in result_data:
                     emails = result_data['emails'][:5]
                     response = f"Found {len(emails)} recruiter emails for {result_data.get('company', 'the company')}:\n\n"
@@ -106,12 +97,12 @@ def process_user_input(user_input: str) -> str:
         except:
             response = result
         
-        print("🤖 [AGENT] Response generated successfully")
+        print("[AGENT] Response generated successfully")
         print("=" * 80 + "\n")
         
         return response
         
     except Exception as error:
-        print(f"❌ [AGENT] Error during processing: {str(error)}")
+        print(f"[AGENT] Error during processing: {str(error)}")
         print("=" * 80 + "\n")
         return "I encountered an error processing your request. Please try again or be more specific."
