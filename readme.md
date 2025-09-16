@@ -1,6 +1,6 @@
-# 🤖 Kong Agentic AI - Job Search Assistant
+# 🤖 Kong AI Gateway - Agentic Job Search Assistant
 
-An intelligent job search platform powered by AI agents that can search for jobs, find recruiter emails, and draft professional application emails through natural language conversations.
+An intelligent job search platform powered by Kong AI Gateway and multi-provider AI agents that can search for jobs, find recruiter emails, and draft professional application emails through natural language conversations with intelligent AI model routing and fallback support.
 
 ## 🏗️ Architecture Overview
 
@@ -10,8 +10,8 @@ graph TB
         FE[React Frontend<br/>Port: 3001]
     end
     
-    subgraph "API Gateway"
-        KONG[Kong Gateway<br/>Port: 8000<br/>API Key Auth]
+    subgraph "Kong AI Gateway Layer"
+        KONG[Kong AI Gateway<br/>Port: 8000<br/>API Key Auth + AI Routing]
     end
     
     subgraph "Microservices"
@@ -19,10 +19,13 @@ graph TB
         JOB[Job Service<br/>Port: 3000<br/>Node.js + Express]
         EMAIL[Email Service<br/>Port: 4000<br/>Node.js + Express]
         FINDER[Email Finder Service<br/>Port: 5000<br/>Node.js + Express]
+        AIGATEWAY[AI Gateway Service<br/>Port: 7000<br/>Multi-Provider AI Router]
     end
     
-    subgraph "AI/LLM Layer"
+    subgraph "AI/LLM Providers"
         CF[Cloudflare AI<br/>Llama 3.3 70B]
+        OPENAI[OpenAI<br/>GPT-4]
+        ANTHROPIC[Anthropic<br/>Claude 3]
     end
     
     subgraph "External APIs"
@@ -37,8 +40,14 @@ graph TB
     KONG --> JOB
     KONG --> EMAIL
     KONG --> FINDER
+    KONG --> AIGATEWAY
     
-    AGENT --> CF
+    AGENT --> AIGATEWAY
+    EMAIL --> AIGATEWAY
+    
+    AIGATEWAY --> CF
+    AIGATEWAY --> OPENAI
+    AIGATEWAY --> ANTHROPIC
     
     JOB --> INDEED
     JOB --> NAUKRI
@@ -48,15 +57,34 @@ graph TB
     style FE fill:#e1f5fe
     style KONG fill:#fff3e0
     style AGENT fill:#f3e5f5
-    style CF fill:#e8f5e8
+    style AIGATEWAY fill:#e8f5e8
+    style CF fill:#f1f8e9
+    style OPENAI fill:#f1f8e9
+    style ANTHROPIC fill:#f1f8e9
 ```
 
 ## 🚀 Features
 
-### 🎯 AI Agent Capabilities
-- **Natural Language Processing**: Understands user intents using Cloudflare AI (Llama 3.3 70B)
+### 🎯 Kong AI Gateway Capabilities
+- **Multi-Provider AI Routing**: Intelligent routing between Cloudflare AI, OpenAI, and Anthropic
+- **AI Model Switching**: Dynamic model selection based on request type and availability
+- **Prompt Management**: Centralized prompt templates and safety guards
+- **AI Load Balancing**: Distribute requests across multiple AI providers for reliability
+- **Fallback Support**: Automatic failover between AI providers
+
+### 🤖 AI Agent Capabilities
+- **Natural Language Processing**: Understands user intents using multiple AI providers
 - **Intent Detection**: Smart pattern matching to determine user requests
 - **Tool Execution**: Automatically executes appropriate tools (job search, email finder, email drafting)
+
+### 🤖 Kong AI Gateway Features
+- **Multi-Provider Routing**: Intelligent routing between Cloudflare AI, OpenAI, and Anthropic
+- **Dynamic Model Selection**: Automatic model switching based on request type and availability
+- **AI Load Balancing**: Distribute requests across multiple AI providers for high availability
+- **Prompt Templates**: Centralized prompt management with safety guards
+- **Fallback Support**: Automatic failover when primary AI provider is unavailable
+- **Rate Limiting**: AI-specific rate limiting and cost control
+- **Model Performance Monitoring**: Track response times and success rates per provider
 
 ### 🔍 Job Search
 - **Multi-platform Search**: Searches across Indeed, Naukri, and other job platforms
@@ -79,12 +107,14 @@ graph TB
 | Component | Technology | Purpose |
 |-----------|------------|---------|
 | **Frontend** | React + TypeScript | User interface and interaction |
-| **API Gateway** | Kong | Request routing, authentication, rate limiting |
+| **AI Gateway** | Kong AI Gateway | AI request routing, model switching, prompt management |
+| **API Gateway** | Kong Gateway | Request routing, authentication, rate limiting |
 | **Agent Service** | Python + FastAPI + LangChain | AI agent orchestration |
+| **AI Gateway Service** | Node.js + Express | Multi-provider AI routing and fallback |
 | **Job Service** | Node.js + Express | Job search and aggregation |
-| **Email Service** | Node.js + Express + Cloudflare AI | Email drafting |
+| **Email Service** | Node.js + Express | Email drafting via AI Gateway |
 | **Email Finder** | Node.js + Express | Recruiter email discovery |
-| **LLM** | Cloudflare AI (Llama 3.3 70B) | Natural language processing & email generation |
+| **AI Providers** | Cloudflare AI, OpenAI, Anthropic | Multiple LLM providers for reliability |
 | **Intent Detection** | Python Regex + LangChain | User intent classification |
 | **Containerization** | Docker + Docker Compose | Deployment and orchestration |
 
@@ -132,7 +162,7 @@ CLEARBIT_API_KEY=your_clearbit_api_key # For company domain lookup
 
 ### 3. Start Services
 ```bash
-# Start all backend services
+# Start all backend services (including Kong AI Gateway)
 docker-compose up -d
 
 # Start frontend (in separate terminal)
@@ -143,7 +173,9 @@ npm start
 
 ### 4. Access Application
 - **Frontend**: http://localhost:3001
-- **API Gateway**: http://localhost:8000
+- **Kong AI Gateway**: http://localhost:8000
+- **AI Chat Endpoint**: http://localhost:8000/ai/chat
+- **AI Providers**: http://localhost:8000/ai/providers
 - **Health Checks**: http://localhost:8000/health
 
 ## 🚀 Quick Commands
@@ -178,10 +210,19 @@ Try these in the AI chat at http://localhost:3001:
 
 ## 💬 Usage Examples
 
-### Job Search
+### AI Provider Switching
+```
+User: "Switch to OpenAI for better responses"
+Agent: 🤖 [AI_GATEWAY] Switching to OpenAI GPT-4
+       ✅ Successfully switched to openai:gpt-4
+       🔄 All future requests will use OpenAI
+```
+
+### Job Search with AI Enhancement
 ```
 User: "Find React developer jobs in Mumbai"
 Agent: 🎯 [INTENT] Detected: JOB_SEARCH
+       🤖 [AI_GATEWAY] Using Cloudflare AI for processing
        🔍 Searching for React jobs in Mumbai...
        ✅ Found 15 jobs! Here are the matches:
        
@@ -206,11 +247,12 @@ Agent: 🎯 [INTENT] Detected: EMAIL_FINDER
        • hiring@google.com (high confidence)
 ```
 
-### Email Drafting
+### Email Drafting with AI Provider Selection
 ```
-User: "Draft email for Netflix software engineer position"
+User: "Draft email for Netflix software engineer position using Claude"
 Agent: 🎯 [INTENT] Detected: EMAIL_DRAFT
-       ✏️ Drafting professional email...
+       🤖 [AI_GATEWAY] Routing to Anthropic Claude for email generation
+       ✏️ Drafting professional email with Claude 3...
        ✅ Email drafted successfully!
        
        Subject: Application for Software Engineer Position
@@ -219,9 +261,55 @@ Agent: 🎯 [INTENT] Detected: EMAIL_DRAFT
        
        I hope this email finds you well. I came across the Software Engineer 
        position at Netflix and I am very excited about the opportunity...
+       
+       🤖 Generated by: anthropic:claude-3-sonnet-20240229
 ```
 
 ## 🔧 API Endpoints
+
+### Kong AI Gateway Endpoints
+```http
+# Chat with AI (multi-provider)
+POST /ai/chat
+Content-Type: application/json
+apikey: hackathon-2024-key
+X-AI-Provider: cloudflare
+
+{
+  "message": "Help me find a job",
+  "provider": "cloudflare",
+  "options": {
+    "max_tokens": 1024,
+    "temperature": 0.7
+  }
+}
+
+# Generate email via AI
+POST /ai/email
+Content-Type: application/json
+apikey: hackathon-2024-key
+
+{
+  "jobTitle": "Software Engineer",
+  "companyName": "Google",
+  "location": "Mountain View",
+  "provider": "openai"
+}
+
+# Get available AI providers
+GET /ai/providers
+apikey: hackathon-2024-key
+
+# Switch AI model
+POST /ai/switch-model
+Content-Type: application/json
+apikey: hackathon-2024-key
+
+{
+  "provider": "anthropic",
+  "model": "claude-3-sonnet-20240229"
+}
+```
 
 ### Agent Service
 ```http
@@ -402,11 +490,13 @@ For support and questions:
 
 ---
 
-**Built with ❤️ using Kong Gateway, LangChain, and Cloudflare AI (Llama 3.3 70B)**
+**Built with ❤️ using Kong AI Gateway, Multi-Provider AI Routing, LangChain, and Advanced AI Orchestration**
 
 ### 🔧 Architecture Summary
 - **Frontend**: React TypeScript application
-- **API Gateway**: Kong with authentication and rate limiting
-- **Agent Service**: Python FastAPI with LangChain and Cloudflare AI
+- **Kong AI Gateway**: Multi-provider AI routing with intelligent fallback
+- **API Gateway**: Kong with authentication, rate limiting, and AI plugins
+- **Agent Service**: Python FastAPI with LangChain and Kong AI Gateway integration
+- **AI Gateway Service**: Node.js service for multi-provider AI routing
 - **Microservices**: Node.js services for jobs, emails, and email finding
-- **AI Model**: Cloudflare AI Llama 3.3 70B for natural language processing
+- **AI Providers**: Cloudflare AI, OpenAI, and Anthropic for diverse AI capabilities

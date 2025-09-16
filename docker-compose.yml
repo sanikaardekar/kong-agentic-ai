@@ -39,21 +39,34 @@ services:
       - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
 
-  kong:
+  ai-gateway-service:
+    build: ./ai-gateway-service
+    container_name: ai-gateway-service
+    ports:
+      - "7000:7000"
+    environment:
+      - NODE_ENV=production
+      - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
+      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+  kong-ai:
     image: kong:3.9
-    container_name: kong-gateway
+    container_name: kong-ai-gateway
     depends_on:
       - job-service
       - email-service
       - email-finder-service
       - agent-service
+      - ai-gateway-service
     environment:
       KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yaml
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong-ai.yaml
       KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
     volumes:
-      - ./kong/kong.yaml:/etc/kong/kong.yaml:ro
+      - ./kong/kong-ai.yaml:/etc/kong/kong-ai.yaml:ro
     ports:
       - "8000:8000"  # proxy (HTTP)
       - "8443:8443"  # proxy (HTTPS)
