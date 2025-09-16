@@ -28,6 +28,8 @@ app.post("/emails", async (req, res) => {
 
     const { company } = parsed.data;
     const emails = await findCompanyEmails(company);
+    
+    console.log('Sample email object:', JSON.stringify(emails[0], null, 2));
 
     res.json({
       company,
@@ -35,7 +37,8 @@ app.post("/emails", async (req, res) => {
       emails: emails.map(e => ({
         email: e.email,
         confidence: e.confidence,
-        source: e.source
+        source: e.source,
+        title: e.title
       }))
     });
   } catch (err: any) {
@@ -59,7 +62,8 @@ app.get("/emails/:company", async (req, res) => {
       emails: emails.map(e => ({
         email: e.email,
         confidence: e.confidence,
-        source: e.source
+        source: e.source,
+        title: e.title
       }))
     });
   } catch (err: any) {

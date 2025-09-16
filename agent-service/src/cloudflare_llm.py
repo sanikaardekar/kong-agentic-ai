@@ -19,7 +19,6 @@ class CloudflareLLM(LLM):
         if not account_id or not api_token:
             raise ValueError("CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN must be set")
             
-        # Pass to parent init
         super().__init__(account_id=account_id, api_token=api_token, **kwargs)
     
     @property
@@ -57,5 +56,5 @@ class CloudflareLLM(LLM):
                 return "Error: Failed to get response from Cloudflare AI"
                 
         except Exception as e:
-            print(f"❌ [CLOUDFLARE_LLM] Error: {str(e)}")
+            print(f"[CLOUDFLARE_LLM] Error: {str(e)}")
             return f"Error: {str(e)}"

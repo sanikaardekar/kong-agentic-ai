@@ -83,7 +83,7 @@ export const EmailPopup: React.FC<EmailPopupProps> = ({ company, onClose, onCopy
                     >
                       {email.confidence}
                     </span>
-                    <span className="source-badge">{email.source}</span>
+
                   </div>
                   <button 
                     className="copy-email-btn"
