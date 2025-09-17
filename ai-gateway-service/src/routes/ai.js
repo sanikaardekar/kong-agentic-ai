@@ -37,7 +37,7 @@ router.post('/chat', async (req, res) => {
     const { message, provider = 'cloudflare', model, options = {} } = req.body;
     const aiProvider = req.headers['x-ai-provider'] || provider;
     
-    console.log(`🤖 AI Gateway: Routing to ${aiProvider}`);
+    console.log(`AI Gateway: Routing to ${aiProvider}`);
     
     const response = await routeToProvider(aiProvider, {
       message,

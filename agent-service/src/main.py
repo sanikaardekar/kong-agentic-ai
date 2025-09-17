@@ -8,12 +8,10 @@ from agent import process_user_input
 import random
 import string
 
-# Load environment variables
 load_dotenv()
 
 app = FastAPI(title="Agent Service", version="1.0.0")
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

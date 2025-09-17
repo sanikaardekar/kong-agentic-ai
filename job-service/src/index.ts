@@ -42,7 +42,6 @@ app.get("/job/:source/:id", async (req, res) => {
       const jobDetail = await fetchGreenhouseJobDetail(String(token), id);
       res.json({ job: jobDetail });
     } else if (source === "lever") {
-      // Lever already includes full descriptions in list API
       const handle = company ?? token;
       if (!handle) return res.status(400).json({ error: "Missing ?company=<leverCompany> for Lever" });
       const jobs = await fetchLeverJobs(String(handle));
@@ -58,13 +57,10 @@ app.get("/job/:source/:id", async (req, res) => {
   }
 });
 
-// Handle search via POST to /jobs
 app.post("/jobs", async (req, res) => {
-  // If body has search params, do search
   if (req.body.jobRole) {
     return handleSearch(req, res);
   }
-  // Otherwise return error
   return res.status(400).json({ error: "Invalid request" });
 });
 
@@ -87,7 +83,6 @@ async function handleSearch(req: any, res: any) {
     console.log(`DEBUG: company truthy check = ${!!company}`);
 
     if (company) {
-      // If company specified, only fetch from that specific company
       console.log(`DEBUG: COMPANY BRANCH - Searching for ${jobRole} at ${company} only`);
       
       try {
@@ -112,10 +107,8 @@ async function handleSearch(req: any, res: any) {
         console.log(`Lever fetch failed for ${company}:`, err);
       }
     } else {
-      // No specific company - fetch from all sources
       console.log(`DEBUG: NO COMPANY BRANCH - Fetching from all sources`);
       
-      // Fetch from Indeed
       try {
         const indeedJobs = await fetchIndeedJobs(jobRole, location, experience);
         allJobs.push(...indeedJobs);
@@ -124,7 +117,6 @@ async function handleSearch(req: any, res: any) {
         console.log("Indeed fetch failed:", err);
       }
 
-      // Fetch from Naukri
       try {
         const naukriJobs = await fetchNaukriJobs(jobRole, location, experience);
         allJobs.push(...naukriJobs);
@@ -132,18 +124,14 @@ async function handleSearch(req: any, res: any) {
       } catch (err) {
         console.log("Naukri fetch failed:", err);
       }
-
-      // Only fetch from job boards (Indeed/Naukri) for general searches
       
       console.log(`Found ${allJobs.length} total jobs from all sources`);
     }
 
-    // Remove duplicates
     const uniqueJobs = allJobs.filter((job, index, self) => 
       index === self.findIndex(j => j.title === job.title && j.company === job.company)
     );
 
-    // Sort by location priority: exact matches first, then others
     const sortedJobs = uniqueJobs.sort((a, b) => {
       const aLocationMatch = a.location.toLowerCase().includes(location.toLowerCase());
       const bLocationMatch = b.location.toLowerCase().includes(location.toLowerCase());
@@ -153,7 +141,6 @@ async function handleSearch(req: any, res: any) {
       return 0;
     });
 
-    // Format for frontend with full job descriptions
     const formattedJobs = sortedJobs.map(job => ({
       id: job.id,
       title: job.title,
@@ -164,7 +151,7 @@ async function handleSearch(req: any, res: any) {
       jobDescription: job.descriptionHtml || (job.raw as any)?.descriptionPlain || (job.raw as any)?.description || "No description available",
       postedAt: job.postedAt,
       isRemote: job.remote || false,
-      rawData: job.raw // Full raw data for email service
+      rawData: job.raw
     }));
 
     const message = (company && formattedJobs.length === 0) 

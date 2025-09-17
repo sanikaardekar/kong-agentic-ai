@@ -8,11 +8,9 @@ interface EmailResult {
   snippet?: string;
 }
 
-// HR/Recruiter titles for realistic emails
 const HR_TITLES = ['recruiter', 'hr', 'talent', 'hiring', 'careers'];
 
 export async function findCompanyEmails(companyName: string): Promise<EmailResult[]> {
-  // Generate dummy emails using random names API
   const dummyEmails = await generateDummyEmails(companyName);
   return dummyEmails;
 }
@@ -26,7 +24,6 @@ async function generateDummyEmails(companyName: string): Promise<EmailResult[]> 
     
     const emails: EmailResult[] = [];
     
-    // Use random names from multiple sources
     const randomNames = await getRandomNames();
     const selectedUsers = randomNames.slice(0, 5);
     
@@ -37,7 +34,6 @@ async function generateDummyEmails(companyName: string): Promise<EmailResult[]> 
       let email: string;
       let confidence: 'high' | 'medium' | 'low';
       
-      // Use different patterns for variety
       switch (index % 3) {
         case 0:
           email = `${firstName}.${lastName}@${domain}`;
@@ -62,7 +58,6 @@ async function generateDummyEmails(companyName: string): Promise<EmailResult[]> 
       });
     });
     
-    // Add generic HR emails
     HR_TITLES.slice(0, 2).forEach(title => {
       emails.push({
         email: `${title}@${domain}`,
@@ -100,11 +95,9 @@ function getRandomTitle(): string {
 
 async function getRandomNames(): Promise<any[]> {
   try {
-    // Try to get names from JSONPlaceholder API first
     const response = await axios.get('https://jsonplaceholder.typicode.com/users');
     const apiUsers = response.data;
     
-    // Add more random names to increase variety
     const additionalNames = [
       { name: 'Taylor Brown' }, { name: 'Casey Davis' }, { name: 'Riley Miller' }, { name: 'Blake Thompson' }, { name: 'Cameron White' }, { name: 'Drew Harris' },
       { name: 'Priya Sharma' }, { name: 'Rahul Patel' }, { name: 'Ananya Singh' }, { name: 'Arjun Kumar' }, { name: 'Kavya Reddy' }, { name: 'Vikram Gupta' },
@@ -129,11 +122,9 @@ async function getRandomNames(): Promise<any[]> {
       { name: 'Deepali Deshpande' }, { name: 'Mahesh Wagh' }, { name: 'Priya Pawar' }, { name: 'Nikhil Shinde' }, { name: 'Kaveri Chavan' }, { name: 'Anil Mane' }
     ];
     
-    // Combine and shuffle all names
     const allUsers = [...apiUsers, ...additionalNames];
     return allUsers.sort(() => Math.random() - 0.5);
   } catch (error) {
-    // Fallback to just additional names if API fails
     const fallbackNames = [
       { name: 'Priya Sharma' }, { name: 'Wei Zhang' }, { name: 'Ananya Singh' },
       { name: 'Li Wang' }, { name: 'Rahul Patel' }, { name: 'Mei Chen' }

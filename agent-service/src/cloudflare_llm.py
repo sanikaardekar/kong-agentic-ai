@@ -13,7 +13,6 @@ class KongAIGatewayLLM(LLM):
     model: str = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
     
     def __init__(self, **kwargs):
-        # Use Kong AI Gateway endpoint
         gateway_url = os.getenv("KONG_AI_GATEWAY_URL", "http://localhost:8000")
         api_key = os.getenv("KONG_API_KEY", "hackathon-2024-key")
         provider = os.getenv("AI_PROVIDER", "cloudflare")
@@ -103,5 +102,4 @@ class KongAIGatewayLLM(LLM):
         except Exception as e:
             return f"Error: Fallback failed - {str(e)}"
 
-# Backward compatibility
 CloudflareLLM = KongAIGatewayLLM
