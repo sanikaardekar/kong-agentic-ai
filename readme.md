@@ -202,13 +202,6 @@ Try these in the AI chat at http://localhost:3001:
 
 ![Usage Examples](screenshots/usage-examples.png)
 
-### AI Provider Switching
-```
-User: "Switch to OpenAI for better responses"
-Agent: [AI_GATEWAY] Switching to OpenAI GPT-4
-       Successfully switched to openai:gpt-4
-       All future requests will use OpenAI
-```
 
 ### Job Search with AI Enhancement
 ```
