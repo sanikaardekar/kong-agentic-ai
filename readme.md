@@ -122,21 +122,6 @@ graph TB
 | **Intent Detection** | Python Regex + LangChain | User intent classification |
 | **Containerization** | Docker + Docker Compose | Deployment and orchestration |
 
-## Prerequisites
-
-- Docker & Docker Compose
-- Node.js 18+ (for frontend development)
-- Cloudflare AI account (required)
-- API keys for external services (optional but recommended)
-
-### API Key Sources
-
-| Service | Purpose | Free Tier | URL |
-|---------|---------|-----------|-----|
-| **Cloudflare AI** | LLM Processing | Yes | https://dash.cloudflare.com |
-| **SerpAPI** | Google Search | 100 searches/month | https://serpapi.com |
-| **Hunter.io** | Email Discovery | 25 searches/month | https://hunter.io |
-| **Clearbit** | Company Data | 50 requests/month | https://clearbit.com |
 
 ## Quick Start
 
@@ -160,7 +145,6 @@ Required environment variables:
 CLOUDFLARE_ACCOUNT_ID=your_account_id
 CLOUDFLARE_API_TOKEN=your_api_token
 
-# External APIs (Optional - for enhanced functionality)
 SERPAPI_KEY=your_serpapi_key          # For Google search-based email finding
 HUNTER_API_KEY=your_hunter_api_key    # For professional email discovery
 CLEARBIT_API_KEY=your_clearbit_api_key # For company domain lookup
@@ -450,72 +434,7 @@ docker-compose up -d --scale job-service=2
 
 MIT License - Hackathon Project
 
-## Troubleshooting
-
-![Troubleshooting Guide](screenshots/troubleshooting.png)
-
-### Common Issues
-
-**Agent not responding:**
-```bash
-# Check Cloudflare credentials
-docker-compose logs agent-service | grep "CLOUDFLARE"
-
-# Check agent service logs
-docker-compose logs --tail=20 agent-service
-
-# Restart agent service
-docker-compose restart agent-service
-```
-
-**Email drafting not working:**
-```bash
-# Check email service logs
-docker-compose logs --tail=20 email-service
-
-# Restart email service
-docker-compose restart email-service
-```
-
-**No jobs found:**
-```bash
-# Check job service logs
-docker-compose logs job-service
-
-# Verify API keys in .env file
-```
-
-**Frontend not loading:**
-```bash
-# Check if frontend is running
-cd frontend && npm start
-
-# Verify Kong gateway
-curl http://localhost:8000/health
-```
-
-### Performance Optimization
-
-**Faster responses:**
-- Use SerpAPI for email finding
-- Add Hunter.io API key
-- Scale agent service replicas
-
-**Better job results:**
-- Add Indeed API key
-- Configure Naukri API access
-- Increase job result limits
-
-## Support
-
-For support and questions:
-- Create an issue in the repository
-- Check the troubleshooting section
-- Review service logs for errors
-
----
-
-**Built using Kong AI Gateway, Multi-Provider AI Routing, LangChain, and Advanced AI Orchestration**
+**Built with Kong AI Gateway, Multi-Provider AI Routing, LangChain, and Advanced AI Orchestration**
 
 ### Architecture Summary
 - **Frontend**: React TypeScript application
