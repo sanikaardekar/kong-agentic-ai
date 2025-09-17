@@ -1,8 +1,12 @@
-# 🤖 Kong AI Gateway - Agentic Job Search Assistant
+# Kong AI Gateway - Agentic Job Search Assistant
 
 An intelligent job search platform powered by Kong AI Gateway and multi-provider AI agents that can search for jobs, find recruiter emails, and draft professional application emails through natural language conversations with intelligent AI model routing and fallback support.
 
-## 🏗️ Architecture Overview
+*Built for hackathon - demonstrating Kong AI Gateway capabilities with multi-provider AI routing*
+
+## Architecture Overview
+
+![Architecture Diagram](screenshots/architecture.png)
 
 ```mermaid
 graph TB
@@ -63,21 +67,21 @@ graph TB
     style ANTHROPIC fill:#f1f8e9
 ```
 
-## 🚀 Features
+## Features
 
-### 🎯 Kong AI Gateway Capabilities
+### Kong AI Gateway Capabilities
 - **Multi-Provider AI Routing**: Intelligent routing between Cloudflare AI, OpenAI, and Anthropic
 - **AI Model Switching**: Dynamic model selection based on request type and availability
 - **Prompt Management**: Centralized prompt templates and safety guards
 - **AI Load Balancing**: Distribute requests across multiple AI providers for reliability
 - **Fallback Support**: Automatic failover between AI providers
 
-### 🤖 AI Agent Capabilities
+### AI Agent Capabilities
 - **Natural Language Processing**: Understands user intents using multiple AI providers
 - **Intent Detection**: Smart pattern matching to determine user requests
 - **Tool Execution**: Automatically executes appropriate tools (job search, email finder, email drafting)
 
-### 🤖 Kong AI Gateway Features
+### Kong AI Gateway Features
 - **Multi-Provider Routing**: Intelligent routing between Cloudflare AI, OpenAI, and Anthropic
 - **Dynamic Model Selection**: Automatic model switching based on request type and availability
 - **AI Load Balancing**: Distribute requests across multiple AI providers for high availability
@@ -86,23 +90,23 @@ graph TB
 - **Rate Limiting**: AI-specific rate limiting and cost control
 - **Model Performance Monitoring**: Track response times and success rates per provider
 
-### 🔍 Job Search
+### Job Search
 - **Multi-platform Search**: Searches across Indeed, Naukri, and other job platforms
 - **Smart Filtering**: Filters by role, experience, location, and company
 - **Real-time Results**: Returns up to 15 job listings with clickable apply links
 
-### 📧 Email Intelligence
+### Email Intelligence
 - **Recruiter Email Discovery**: Finds recruiter emails using Google search and Hunter.io
 - **AI-Powered Email Drafting**: Cloudflare AI generates personalized application emails
 - **Clickable Apply Links**: Direct links to job applications
 
-### 🛡️ Security & Performance
+### Security & Performance
 - **API Gateway**: Kong-based routing with API key authentication
 - **Rate Limiting**: Built-in request throttling
 - **Error Handling**: Comprehensive error handling and logging
 - **Containerized**: Full Docker deployment
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Component | Technology | Purpose |
 |-----------|------------|---------|
@@ -118,23 +122,25 @@ graph TB
 | **Intent Detection** | Python Regex + LangChain | User intent classification |
 | **Containerization** | Docker + Docker Compose | Deployment and orchestration |
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Docker & Docker Compose
 - Node.js 18+ (for frontend development)
 - Cloudflare AI account (required)
 - API keys for external services (optional but recommended)
 
-### 🔑 API Key Sources
+### API Key Sources
 
 | Service | Purpose | Free Tier | URL |
 |---------|---------|-----------|-----|
-| **Cloudflare AI** | LLM Processing | ✅ Yes | https://dash.cloudflare.com |
-| **SerpAPI** | Google Search | ✅ 100 searches/month | https://serpapi.com |
-| **Hunter.io** | Email Discovery | ✅ 25 searches/month | https://hunter.io |
-| **Clearbit** | Company Data | ✅ 50 requests/month | https://clearbit.com |
+| **Cloudflare AI** | LLM Processing | Yes | https://dash.cloudflare.com |
+| **SerpAPI** | Google Search | 100 searches/month | https://serpapi.com |
+| **Hunter.io** | Email Discovery | 25 searches/month | https://hunter.io |
+| **Clearbit** | Company Data | 50 requests/month | https://clearbit.com |
 
-## ⚡ Quick Start
+## Quick Start
+
+![Quick Start Demo](screenshots/quick-start.png)
 
 ### 1. Clone Repository
 ```bash
@@ -178,7 +184,7 @@ npm start
 - **AI Providers**: http://localhost:8000/ai/providers
 - **Health Checks**: http://localhost:8000/health
 
-## 🚀 Quick Commands
+## Quick Commands
 
 ### Start Everything
 ```bash
@@ -199,61 +205,63 @@ docker-compose logs -f
 docker-compose logs -f agent-service
 
 # Real-time agent thinking
-docker-compose logs -f agent-service | grep "🤖\|🎯\|🔍\|📧\|✏️"
+docker-compose logs -f agent-service | grep "AI_GATEWAY\|INTENT\|SEARCH\|EMAIL\|DRAFT"
 ```
 
 ### Test Commands
 Try these in the AI chat at http://localhost:3001:
-- `"Find React jobs in Mumbai"`
-- `"Get recruiter emails for Google"`
-- `"Draft email for software engineer position"`
+- "Find React jobs in Mumbai"
+- "Get recruiter emails for Google"
+- "Draft email for software engineer position"
 
-## 💬 Usage Examples
+## Usage Examples
+
+![Usage Examples](screenshots/usage-examples.png)
 
 ### AI Provider Switching
 ```
 User: "Switch to OpenAI for better responses"
-Agent: 🤖 [AI_GATEWAY] Switching to OpenAI GPT-4
-       ✅ Successfully switched to openai:gpt-4
-       🔄 All future requests will use OpenAI
+Agent: [AI_GATEWAY] Switching to OpenAI GPT-4
+       Successfully switched to openai:gpt-4
+       All future requests will use OpenAI
 ```
 
 ### Job Search with AI Enhancement
 ```
 User: "Find React developer jobs in Mumbai"
-Agent: 🎯 [INTENT] Detected: JOB_SEARCH
-       🤖 [AI_GATEWAY] Using Cloudflare AI for processing
-       🔍 Searching for React jobs in Mumbai...
-       ✅ Found 15 jobs! Here are the matches:
+Agent: [INTENT] Detected: JOB_SEARCH
+       [AI_GATEWAY] Using Cloudflare AI for processing
+       Searching for React jobs in Mumbai...
+       Found 15 jobs! Here are the matches:
        
        1. React Developer at TechCorp
-          📍 Mumbai, Maharashtra
-          🔗 [Apply Here]
+          Location: Mumbai, Maharashtra
+          [Apply Here]
        
        2. Frontend Engineer at StartupXYZ
-          📍 Mumbai, Maharashtra  
-          🔗 [Apply Here]
+          Location: Mumbai, Maharashtra  
+          [Apply Here]
 ```
 
 ### Email Discovery
 ```
 User: "Get recruiter emails for Google"
-Agent: 🎯 [INTENT] Detected: EMAIL_FINDER
-       📧 Searching emails for Google...
-       ✅ Found 5 recruiter emails:
+Agent: [INTENT] Detected: EMAIL_FINDER
+       Searching emails for Google...
+       Found 5 recruiter emails:
        
-       • recruiter@google.com (high confidence)
-       • talent@google.com (medium confidence)
-       • hiring@google.com (high confidence)
+       - recruiter@google.com (high confidence)
+       - talent@google.com (medium confidence)
+       - hiring@google.com (high confidence)
 ```
 
 ### Email Drafting with AI Provider Selection
 ```
 User: "Draft email for Netflix software engineer position using Claude"
-Agent: 🎯 [INTENT] Detected: EMAIL_DRAFT
-       🤖 [AI_GATEWAY] Routing to Anthropic Claude for email generation
-       ✏️ Drafting professional email with Claude 3...
-       ✅ Email drafted successfully!
+Agent: [INTENT] Detected: EMAIL_DRAFT
+       [AI_GATEWAY] Routing to Anthropic Claude for email generation
+       Drafting professional email with Claude 3...
+       Email drafted successfully!
        
        Subject: Application for Software Engineer Position
        
@@ -262,10 +270,12 @@ Agent: 🎯 [INTENT] Detected: EMAIL_DRAFT
        I hope this email finds you well. I came across the Software Engineer 
        position at Netflix and I am very excited about the opportunity...
        
-       🤖 Generated by: anthropic:claude-3-sonnet-20240229
+       Generated by: anthropic:claude-3-sonnet-20240229
 ```
 
-## 🔧 API Endpoints
+## API Endpoints
+
+![API Testing](screenshots/api-endpoints.png)
 
 ### Kong AI Gateway Endpoints
 ```http
@@ -346,7 +356,9 @@ apikey: hackathon-2024-key
 }
 ```
 
-## 📊 Monitoring & Logs
+## Monitoring & Logs
+
+![System Logs](screenshots/monitoring-logs.png)
 
 ### View Service Logs
 ```bash
@@ -357,7 +369,7 @@ docker-compose logs -f
 docker-compose logs -f agent-service
 
 # Real-time agent thinking process
-docker-compose logs -f agent-service | grep "🤖\|🎯\|🔍\|📧\|✏️"
+docker-compose logs -f agent-service | grep "AI_GATEWAY\|INTENT\|SEARCH\|EMAIL\|DRAFT"
 ```
 
 ### Health Checks
@@ -369,7 +381,9 @@ docker-compose ps
 curl -H "apikey: hackathon-2024-key" http://localhost:8000/health
 ```
 
-## 🎨 Frontend Features
+## Frontend Features
+
+![Frontend Interface](screenshots/frontend-features.png)
 
 ### AI Chat Interface
 - **Natural Language Input**: Type requests in plain English
@@ -383,7 +397,7 @@ curl -H "apikey: hackathon-2024-key" http://localhost:8000/health
 - **Email Popup**: Recruiter email discovery modal
 - **Draft Panel**: Side panel for email composition
 
-## 🔒 Security
+## Security
 
 ### Authentication
 - **API Key Based**: All services protected with API keys
@@ -395,7 +409,7 @@ curl -H "apikey: hackathon-2024-key" http://localhost:8000/health
 - **API Key Rotation**: Support for key rotation
 - **Secure Headers**: Security headers in all responses
 
-## 🚀 Deployment
+## Deployment
 
 ### Development
 ```bash
@@ -415,19 +429,30 @@ docker-compose up -d --scale agent-service=3
 docker-compose up -d --scale job-service=2
 ```
 
-## 🤝 Contributing
+## Demo Screenshots
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+### Main Interface
+![Main Interface](screenshots/main-interface.png)
 
-## 📝 License
+### AI Provider Switching
+![AI Provider Switching](screenshots/ai-provider-switching.png)
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Job Search Results
+![Job Search Results](screenshots/job-search-results.png)
 
-## 🆘 Troubleshooting
+### Email Generation
+![Email Generation](screenshots/email-generation.png)
+
+### Kong AI Gateway Dashboard
+![Kong Dashboard](screenshots/kong-dashboard.png)
+
+## License
+
+MIT License - Hackathon Project
+
+## Troubleshooting
+
+![Troubleshooting Guide](screenshots/troubleshooting.png)
 
 ### Common Issues
 
@@ -481,7 +506,7 @@ curl http://localhost:8000/health
 - Configure Naukri API access
 - Increase job result limits
 
-## 📞 Support
+## Support
 
 For support and questions:
 - Create an issue in the repository
@@ -490,9 +515,9 @@ For support and questions:
 
 ---
 
-**Built with ❤️ using Kong AI Gateway, Multi-Provider AI Routing, LangChain, and Advanced AI Orchestration**
+**Built using Kong AI Gateway, Multi-Provider AI Routing, LangChain, and Advanced AI Orchestration**
 
-### 🔧 Architecture Summary
+### Architecture Summary
 - **Frontend**: React TypeScript application
 - **Kong AI Gateway**: Multi-provider AI routing with intelligent fallback
 - **API Gateway**: Kong with authentication, rate limiting, and AI plugins
