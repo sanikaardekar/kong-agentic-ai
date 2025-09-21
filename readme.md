@@ -4,6 +4,44 @@ An intelligent job search platform powered by Kong AI Gateway and multi-provider
 
 *Built for hackathon - demonstrating Kong AI Gateway capabilities with multi-provider AI routing*
 
+## Problem Statement & Agentic AI Connection
+
+### What Problem Does It Solve?
+
+Job searching is a complex, multi-step process that typically requires:
+- **Manual Platform Navigation**: Switching between multiple job sites (Indeed, Naukri, LinkedIn)
+- **Recruiter Contact Discovery**: Spending hours finding the right hiring contacts
+- **Personalized Email Crafting**: Writing tailored application emails for each position
+- **Context Switching**: Managing information across different tools and platforms
+
+This creates friction, inefficiency, and missed opportunities for job seekers.
+
+### How It Relates to Agentic AI
+
+This project embodies **Agentic AI** principles by creating autonomous agents that:
+
+#### 🤖 **Autonomous Decision Making**
+- **Intent Recognition**: AI agents automatically detect user goals from natural language
+- **Tool Selection**: Agents choose appropriate tools (job search, email finder, email drafting) without explicit instruction
+- **Provider Routing**: Kong AI Gateway intelligently routes requests to optimal AI providers (Cloudflare, OpenAI, Anthropic)
+
+#### 🔄 **Multi-Step Task Execution**
+- **Workflow Orchestration**: Single user request triggers multi-service workflows
+- **Context Preservation**: Agents maintain context across job search → email finding → email drafting
+- **Error Recovery**: Automatic fallback between AI providers ensures task completion
+
+#### 🧠 **Intelligent Reasoning**
+- **Natural Language Understanding**: Converts "Find React jobs in Mumbai" into structured API calls
+- **Dynamic Adaptation**: Switches AI models based on task complexity and provider availability
+- **Personalization**: Generates contextual emails based on job details and company information
+
+#### 🛠️ **Tool Integration**
+- **API Orchestration**: Seamlessly integrates job APIs, email finders, and AI providers
+- **Multi-Provider Resilience**: Kong AI Gateway ensures high availability through provider diversity
+- **Real-time Processing**: Provides immediate feedback while agents work in background
+
+**Result**: A single conversational interface that replaces hours of manual work with intelligent, autonomous task execution - the essence of Agentic AI.
+
 ## Architecture Overview
 
 ![Architecture Diagram](screenshots/architecture.png)
