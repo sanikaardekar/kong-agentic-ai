@@ -273,7 +273,7 @@ Agent: [INTENT] Detected: EMAIL_FINDER
 #### Emails via Agent(using prompt)
 ![Get Emails](images/get-emails-agent.png)
 
-### Email Drafting with AI Provider Selection (customsised based on JD of Job)
+### Email Drafting with AI Provider Selection (customised based on JD of Job)
 ```
 User: "Draft email for Netflix software engineer position using Claude"
 Agent: [INTENT] Detected: EMAIL_DRAFT
