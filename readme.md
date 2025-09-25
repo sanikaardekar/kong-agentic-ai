@@ -2,7 +2,7 @@
 
 An intelligent job search platform powered by Kong AI Gateway and multi-provider AI agents that can search for jobs, find recruiter emails, and draft professional application emails through natural language conversations with intelligent AI model routing and fallback support.
 
-*Built for hackathon - demonstrating Kong AI Gateway capabilities with multi-provider AI routing*
+*Built for hackathon - demonstrating Kong AI Gateway capabilities with multi-provider AI routing (images demo and video attached in end of readme)*
 
 ## Problem Statement & Agentic AI Connection
 
