@@ -40,9 +40,9 @@ async function sendTestEmail() {
       subject: 'Application for Backend Engineer at Lever',
       text: emailText,
     });
-    console.log('✅ Email sent successfully!');
+    console.log('Email sent successfully!');
   } catch (error) {
-    console.error('❌ Email failed:', error.message);
+    console.error('Email failed:', error.message);
   }
 }
 

@@ -8,4 +8,5 @@ export const DraftEmailSchema = z.object({
   location: z.string().optional(),
   userProfile: z.string(),
   source: z.string().optional(),
+  userPrompt: z.string().optional(),
 });

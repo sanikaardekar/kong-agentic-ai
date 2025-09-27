@@ -1,24 +1,9 @@
 _format_version: "3.0"
 _transform: true
 
-upstreams:
-  - name: job-service-upstream
-    algorithm: round-robin
-    healthchecks:
-      active:
-        healthy:
-          interval: 10
-          successes: 3
-        unhealthy:
-          interval: 10
-          http_failures: 3
-    targets:
-      - target: job-service:3000
-        weight: 100
-
 services:
   - name: job-service
-    host: job-service-upstream
+    url: http://job-service:3000
     retries: 3
     connect_timeout: 5000
     read_timeout: 60000
@@ -26,24 +11,68 @@ services:
     routes:
       - name: job-route
         paths: ["/jobs"]
-        strip_path: true
-        methods: ["GET", "POST"]
+        strip_path: false
+        methods: ["GET", "POST", "OPTIONS"]
 
   - name: email-service
     url: http://email-service:4000
     routes:
       - name: email-route
         paths: ["/email"]
+        strip_path: false
+        methods: ["GET", "POST", "OPTIONS"]
+
+  - name: email-finder-service
+    url: http://email-finder-service:5000
+    routes:
+      - name: email-finder-route
+        paths: ["/emails"]
+        strip_path: false
+        methods: ["GET", "POST", "OPTIONS"]
+
+  - name: agent-service
+    url: http://agent-service:6000
+    routes:
+      - name: agent-route
+        paths: ["/chat"]
+        strip_path: false
+        methods: ["GET", "POST", "OPTIONS"]
+      - name: agent-health-route
+        paths: ["/agent/health"]
         strip_path: true
-        methods: ["GET", "POST"]
+        methods: ["GET"]
+
+  - name: health-service
+    url: http://agent-service:6000
+    routes:
+      - name: health-route
+        paths: ["/health"]
+        strip_path: false
+        methods: ["GET"]
 
 plugins:
+  - name: cors
+    config:
+      origins: ["*"]
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      headers: ["Accept", "Accept-Version", "Content-Length", "Content-MD5", "Content-Type", "Date", "X-Auth-Token", "apikey"]
+      exposed_headers: ["X-Auth-Token"]
+      credentials: true
+      max_age: 3600
   - name: key-auth
     service: job-service
     config:
       key_names: ["apikey"]
   - name: key-auth
     service: email-service
+    config:
+      key_names: ["apikey"]
+  - name: key-auth
+    service: email-finder-service
+    config:
+      key_names: ["apikey"]
+  - name: key-auth
+    service: agent-service
     config:
       key_names: ["apikey"]
   - name: rate-limiting

@@ -2,9 +2,6 @@ import axios from "axios";
 import { normalizeIndeedJob } from "../normalize.js";
 import type { NormalizedJob } from "../types.js";
 
-/**
- * Fetch jobs from Indeed using SerpAPI (reliable & structured)
- */
 export async function fetchIndeedJobs(jobRole: string, location: string, experience?: string): Promise<NormalizedJob[]> {
   try {
     const SERPAPI_KEY = process.env.SERPAPI_KEY;

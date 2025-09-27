@@ -1,7 +1,7 @@
 {
-  "name": "cold-email-agent",
+  "name": "kong-agentic-ai",
   "version": "1.0.0",
-  "description": "AI-powered cold email agent with Kong Gateway integration",
+  "description": "AI-powered job search assistant using Cloudflare AI and Kong Gateway",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -9,14 +9,14 @@
     "kong:setup": "node scripts/kong-setup.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "axios": "^1.6.0",
-    "openai": "^4.20.0",
-    "nodemailer": "^6.9.7",
+    "axios": "^1.12.2",
     "cheerio": "^1.0.0-rc.12",
-    "dotenv": "^16.3.1",
     "cors": "^2.8.5",
-    "helmet": "^7.1.0"
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "nodemailer": "^6.9.7",
+    "openai": "^4.20.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

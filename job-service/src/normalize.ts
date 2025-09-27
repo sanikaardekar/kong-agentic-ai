@@ -13,7 +13,6 @@ export function normalizeGreenhouseJob(job: any, company: string): NormalizedJob
     location: job?.location?.name ?? undefined,
     remote: guessRemote(job?.location?.name, job?.title),
     applyUrl: job?.absolute_url,
-    // description is not available in list endpoint; could be fetched via /jobs/:id if needed
     postedAt: job?.updated_at ?? job?.created_at ?? undefined,
     source: "greenhouse",
     raw: job,

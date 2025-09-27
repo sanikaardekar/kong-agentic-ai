@@ -40,7 +40,6 @@ export async function fetchNaukriJobs(jobRole: string, location: string, experie
         throw new Error("No Naukri results found");
       }
       
-      // Filter and format Naukri results
       const naukriJobs = results
         .filter((result: any) => result.link && result.link.includes('naukri.com'))
         .map((result: any) => ({
@@ -60,7 +59,6 @@ export async function fetchNaukriJobs(jobRole: string, location: string, experie
 }
 
 function extractCompanyFromTitle(title: string): string {
-  // Extract company name from job title patterns
   const patterns = [
     /at\s+([^-]+?)\s*-/i,
     /\|\s*([^|]+?)\s*$/i,
