@@ -86,12 +86,10 @@ graph TB
 
 ## Features
 
-## Service Overview
-
 ### Kong AI Gateway 
 **Orchestrates multi-provider AI routing with intelligent fallback between Cloudflare AI, OpenAI, and Anthropic for maximum reliability and performance.**
 
-### Service Functions
+### Service Functions 
 - **Agent Service**: Processes natural language queries and routes to appropriate microservices
 - **Job Service**: Aggregates job listings from Indeed, Naukri, and other platforms
 - **Email Finder**: Discovers recruiter contacts using Google Search and Hunter.io APIs
