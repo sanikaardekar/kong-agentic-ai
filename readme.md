@@ -1,8 +1,15 @@
 # Kong AI Gateway - Agentic Job Search Assistant
 
-An intelligent job search platform powered by Kong AI Gateway and multi-provider AI agents that can search for jobs, find recruiter emails, and draft professional application emails through natural language conversations with intelligent AI model routing and fallback support.
+An intelligent job search platform powered by Kong AI Gateway and multi-provider AI agents that can search for jobs, find recruiter emails, and draft professional application emails based on the JD, refine it further, all through the same application without the need to switch tabs, through natural language conversations with an intelligent AI model routing and fallback support.
 
 *Built for hackathon - demonstrating Kong AI Gateway capabilities with multi-provider AI routing <span style="background-color: yellow;">(images demo and video attached in end of readme)*</span>
+
+#### Members
+- Sanika Ardekar (sanikarardekar@gmail.com)
+- Prachet Shah (prachetshah25@gmail.com)
+
+#### ![Video Demo](https://youtu.be/f8rd3Q4T1AA)
+
 
 ## Problem Statement & Agentic AI Connection
 
