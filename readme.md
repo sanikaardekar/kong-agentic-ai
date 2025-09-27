@@ -5,7 +5,7 @@ An intelligent job search platform powered by Kong AI Gateway and multi-provider
 *Built for hackathon - demonstrating Kong AI Gateway capabilities with multi-provider AI routing <span style="background-color: yellow;">(images demo and video attached in end of readme)*</span>
 
 #### Members
-- Sanika Ardekar (sanikarardekar@gmail.com)
+- Sanika Ardekar (sanikaardekar@gmail.com)
 - Prachet Shah (prachetshah25@gmail.com)
 
 #### [Video Demo](https://youtu.be/f8rd3Q4T1AA)
