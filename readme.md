@@ -8,7 +8,7 @@ An intelligent job search platform powered by Kong AI Gateway and multi-provider
 - Sanika Ardekar (sanikarardekar@gmail.com)
 - Prachet Shah (prachetshah25@gmail.com)
 
-#### ![Video Demo](https://youtu.be/f8rd3Q4T1AA)
+#### [Video Demo](https://youtu.be/f8rd3Q4T1AA)
 
 
 ## Problem Statement & Agentic AI Connection
