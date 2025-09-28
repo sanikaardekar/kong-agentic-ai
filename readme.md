@@ -21,6 +21,8 @@ Job searching is a complex, multi-step process that typically requires:
 
 This creates friction, inefficiency, and missed opportunities for job seekers.
 
+This is where Agentic AI comes in, enabling autonomous agents that understand user intent, orchestrate multi-step workflows, and adapt dynamically. Instead of juggling multiple platforms, the system uses natural language to search jobs, find recruiter emails, and draft personalized applications, while preserving context and ensuring seamless execution.
+
 A single conversational interface that replaces hours of manual work with intelligent, autonomous task execution.
 
 ## Architecture Overview
