@@ -174,7 +174,7 @@ function App() {
           
           {agentResponse && (
             <div className="agent-response">
-              <h3>Assistant Response:</h3>
+              <h3>Here is the response for you based on the prompt given:</h3>
               <div className="response-content">
                 {(() => {
                   const lines = agentResponse.split('\n');
