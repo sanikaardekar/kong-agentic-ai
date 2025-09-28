@@ -175,7 +175,6 @@ cd frontend
 npm start
 ```
 
-
 ## Usage Examples along with Demo Screenshots (Video in end)
 
 ### Homepage
