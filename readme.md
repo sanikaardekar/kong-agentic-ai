@@ -120,6 +120,62 @@ Try these in the AI chat at http://localhost:3001:
 - "Get recruiter emails for Google"
 - "Draft email for software engineer position"
 
+## Quick Start
+
+### 1. Clone Repository
+```bash
+git clone <repository-url>
+cd kong-agentic-ai
+```
+
+### 2. Configure Environment
+```bash
+# Copy and edit environment variables
+cp .env.example .env
+```
+
+Required environment variables:
+```env
+# Cloudflare AI (Required)
+CLOUDFLARE_ACCOUNT_ID=your_account_id
+CLOUDFLARE_API_TOKEN=your_api_token
+
+SERPAPI_KEY=your_serpapi_key          # For Google search-based email finding
+HUNTER_API_KEY=your_hunter_api_key    # For professional email discovery
+CLEARBIT_API_KEY=your_clearbit_api_key # For company domain lookup
+```
+
+### 3. Start Services
+```bash
+# Start all backend services (including Kong AI Gateway)
+docker-compose up -d
+
+# Start frontend (in separate terminal)
+cd frontend
+npm install
+npm start
+```
+
+### 4. Access Application
+- **Frontend**: http://localhost:3001
+- **Kong AI Gateway**: http://localhost:8000
+- **AI Chat Endpoint**: http://localhost:8000/ai/chat
+- **AI Providers**: http://localhost:8000/ai/providers
+- **Health Checks**: http://localhost:8000/health
+
+## Quick Commands
+
+### Start Everything
+```bash
+# Start all backend services
+docker-compose up
+
+# Start frontend (new terminal)
+cd frontend
+npm start
+```
+
+
 ## Usage Examples along with Demo Screenshots (Video in end)
 
 ### Homepage
