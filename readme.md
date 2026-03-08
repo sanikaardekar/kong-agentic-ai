@@ -34,24 +34,19 @@ graph TB
     end
     
     subgraph "Microservices"
-        AGENT[Agent Service<br/>Port: 6000<br/>Python + FastAPI]
+        AGENT[Agent Service<br/>Port: 6001<br/>Python + FastAPI<br/>AI-Powered Intent Detection]
         JOB[Job Service<br/>Port: 3000<br/>Node.js + Express]
         EMAIL[Email Service<br/>Port: 4000<br/>Node.js + Express]
         FINDER[Email Finder Service<br/>Port: 5000<br/>Node.js + Express]
-        AIGATEWAY[AI Gateway Service<br/>Port: 7000<br/>Multi-Provider AI Router]
     end
     
-    subgraph "AI/LLM Providers"
+    subgraph "AI Provider"
         CF[Cloudflare AI<br/>Llama 3.3 70B]
-        OPENAI[OpenAI<br/>GPT-4]
-        ANTHROPIC[Anthropic<br/>Claude 3]
     end
     
     subgraph "External APIs"
         INDEED[Indeed Jobs API]
         NAUKRI[Naukri Jobs API]
-        SERPAPI[SerpAPI<br/>Google Search]
-        HUNTER[Hunter.io<br/>Email Finder]
     end
     
     FE --> AGENT
@@ -59,37 +54,31 @@ graph TB
     FE --> EMAIL
     FE --> FINDER
     
-    AGENT --> AIGATEWAY
-    EMAIL --> AIGATEWAY
+    AGENT --> CF
+    AGENT --> JOB
+    AGENT --> EMAIL
+    AGENT --> FINDER
     
-    AIGATEWAY --> CF
-    AIGATEWAY --> OPENAI
-    AIGATEWAY --> ANTHROPIC
+    EMAIL --> CF
     
     JOB --> INDEED
     JOB --> NAUKRI
-    FINDER --> SERPAPI
-    FINDER --> HUNTER
     
     style FE fill:#e1f5fe
     style AGENT fill:#f3e5f5
-    style AIGATEWAY fill:#e8f5e8
     style CF fill:#f1f8e9
-    style OPENAI fill:#f1f8e9
-    style ANTHROPIC fill:#f1f8e9
 ```
 
 ## Features
 
-### AI Gateway Service
-**Orchestrates multi-provider AI routing with intelligent fallback between Cloudflare AI, OpenAI, and Anthropic for maximum reliability and performance.**
+### AI-Powered Agent Service
+**Uses Cloudflare AI (Llama 3.3 70B) for intelligent intent detection and parameter extraction from natural language queries.**
 
 ### Service Functions 
-- **Agent Service**: Processes natural language queries and routes to appropriate microservices
+- **Agent Service**: Uses AI to understand user intent and route to appropriate microservices
 - **Job Service**: Aggregates job listings from Indeed, Naukri, and other platforms
 - **Email Finder**: Discovers recruiter contacts (currently generates realistic dummy data)
-- **Email Service**: Generates personalized application emails via AI Gateway
-- **AI Gateway Service**: Manages multi-provider AI routing with automatic failover
+- **Email Service**: Generates personalized application emails using Cloudflare AI
 
 ### Note on Email Finder
 The email finder service currently generates realistic dummy email addresses based on company names. To enable real email discovery:
@@ -102,13 +91,11 @@ The email finder service currently generates realistic dummy email addresses bas
 | Component | Technology | Purpose |
 |-----------|------------|---------|
 | **Frontend** | React + TypeScript | User interface and interaction |
-| **Agent Service** | Python + FastAPI + LangChain | AI agent orchestration |
-| **AI Gateway Service** | Node.js + Express | Multi-provider AI routing and fallback |
+| **Agent Service** | Python + FastAPI | AI-powered intent detection and orchestration |
 | **Job Service** | Node.js + Express | Job search and aggregation |
-| **Email Service** | Node.js + Express | Email drafting via AI Gateway |
+| **Email Service** | Node.js + Express | Email drafting using Cloudflare AI |
 | **Email Finder** | Node.js + Express | Recruiter email discovery |
-| **AI Providers** | Cloudflare AI, OpenAI, Anthropic | Multiple LLM providers for reliability |
-| **Intent Detection** | Python Regex + LangChain | User intent classification |
+| **AI Provider** | Cloudflare AI (Llama 3.3 70B) | Intent detection and email generation |
 | **Containerization** | Docker + Docker Compose | Deployment and orchestration |
 
 ### Test Commands
@@ -138,7 +125,7 @@ cd ..
 
 Required backend environment variables:
 ```env
-# Cloudflare AI (Required)
+# Cloudflare AI (Required - used for intent detection and email generation)
 CLOUDFLARE_ACCOUNT_ID=your_account_id
 CLOUDFLARE_API_TOKEN=your_api_token
 
@@ -146,10 +133,6 @@ CLOUDFLARE_API_TOKEN=your_api_token
 SERPAPI_KEY=your_serpapi_key
 HUNTER_API_KEY=your_hunter_api_key
 CLEARBIT_API_KEY=your_clearbit_api_key
-
-# Optional: For additional AI providers
-OPENAI_API_KEY=your_openai_key
-ANTHROPIC_API_KEY=your_anthropic_key
 ```
 
 Frontend environment variables:
@@ -274,11 +257,12 @@ docker-compose up -d
 ![Homepage](images/homepage.png)
 
 
-### Job Search with AI Enhancement
+### Job Search with AI-Powered Intent Detection
 ```
 User: "Find React developer jobs in Mumbai"
-Agent: [INTENT] Detected: JOB_SEARCH
-       [AI_GATEWAY] Using Cloudflare AI for processing
+Agent: [AI] Detecting intent using Cloudflare AI...
+       [INTENT] Detected: job_search
+       [PARAMS] jobRole: react, location: mumbai
        Searching for React jobs in Mumbai...
        Found 15 jobs! Here are the matches:
        
@@ -309,12 +293,13 @@ Agent: [INTENT] Detected: EMAIL_FINDER
 #### Emails via Agent(using prompt)
 ![Get Emails](images/get-emails-agent.png)
 
-### Email Drafting with AI Provider Selection (customised based on JD of Job)
+### Email Drafting with Cloudflare AI
 ```
-User: "Draft email for Netflix software engineer position using Claude"
-Agent: [INTENT] Detected: EMAIL_DRAFT
-       [AI_GATEWAY] Routing to Anthropic Claude for email generation
-       Drafting professional email with Claude 3...
+User: "Draft email for Netflix software engineer position"
+Agent: [AI] Detecting intent using Cloudflare AI...
+       [INTENT] Detected: email_draft
+       [PARAMS] jobTitle: software engineer, company: netflix
+       Drafting professional email with Cloudflare AI...
        Email drafted successfully!
        
        Subject: Application for Software Engineer Position
@@ -323,8 +308,6 @@ Agent: [INTENT] Detected: EMAIL_DRAFT
        
        I hope this email finds you well. I came across the Software Engineer 
        position at Netflix and I am very excited about the opportunity...
-       
-       Generated by: anthropic:claude-3-sonnet-20240229
 ```
 ![Draft Email](images/draft-email-click.png)
 
