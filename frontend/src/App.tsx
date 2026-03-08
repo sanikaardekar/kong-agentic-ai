@@ -6,6 +6,7 @@ import { EmailDraft } from './components/EmailDraft';
 import { EmailPopup } from './components/EmailPopup';
 import { AgentChat } from './components/AgentChat';
 import { Job, JobSearchForm, DraftedEmail } from './types';
+import { API_ENDPOINTS } from './config';
 
 function App() {
   const [form, setForm] = useState<JobSearchForm>({
@@ -30,11 +31,10 @@ function App() {
     setLoading(true);
     setDraftedEmail(null);
     try {
-      const response = await fetch('http://localhost:8000/jobs', {
+      const response = await fetch(`${API_ENDPOINTS.JOB}/jobs`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'hackathon-2024-key'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(form)
       });
@@ -51,11 +51,10 @@ function App() {
     setDraftingJobId(index);
     setCurrentJob(job);
     try {
-      const response = await fetch('http://localhost:8000/email/draft', {
+      const response = await fetch(`${API_ENDPOINTS.EMAIL}/email/draft`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'hackathon-2024-key'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           jobTitle: job.title,
@@ -91,11 +90,10 @@ function App() {
 
   const handleDraftEmail = async (jobTitle: string, companyName: string) => {
     try {
-      const response = await fetch('http://localhost:8000/email/draft', {
+      const response = await fetch(`${API_ENDPOINTS.EMAIL}/email/draft`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'hackathon-2024-key'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           jobTitle,

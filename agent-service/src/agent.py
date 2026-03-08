@@ -1,108 +1,151 @@
-import os
 import json
 import re
-from cloudflare_llm import CloudflareLLM
-from tools.job_search_tool import job_search_tool
-from tools.email_finder_tool import email_finder_tool
-from tools.email_draft_tool import email_draft_tool
-
-# Initialize Cloudflare LLM
-llm = CloudflareLLM()
-
-# Define tools
-tools = {
-    "job_search": job_search_tool,
-    "find_emails": email_finder_tool,
-    "draft_email": email_draft_tool
-}
-
-def determine_intent_and_execute(user_input: str) -> str:
-    user_input_lower = user_input.lower()
-    
-    if any(word in user_input_lower for word in ['find jobs', 'search jobs', 'job search', 'jobs in', 'positions']):
-        print("[INTENT] Detected: JOB_SEARCH")
-        
-        role_match = re.search(r'(\w+)\s+(?:jobs|developer|engineer|position)', user_input_lower)
-        location_match = re.search(r'in\s+(\w+)', user_input_lower)
-        
-        params = {
-            "jobRole": role_match.group(1) if role_match else "software engineer",
-            "location": location_match.group(1) if location_match else "mumbai",
-            "experience": "2"
-        }
-        
-        return tools["job_search"].func(json.dumps(params))
-    
-    elif any(word in user_input_lower for word in ['find emails', 'get emails', 'recruiter emails', 'contact']):
-        print("[INTENT] Detected: EMAIL_FINDER")
-        
-        company_match = re.search(r'(?:for|at)\s+(\w+)', user_input_lower)
-        company = company_match.group(1) if company_match else "google"
-        
-        params = {"company": company}
-        return tools["find_emails"].func(json.dumps(params))
-    
-    elif any(word in user_input_lower for word in ['draft email', 'write email', 'compose email']):
-        print("[INTENT] Detected: EMAIL_DRAFT")
-        
-        company_match = re.search(r'(?:for|at)\s+(\w+)', user_input_lower)
-        role_match = re.search(r'(\w+)\s+(?:engineer|developer|position|job|role)', user_input_lower)
-        
-        params = {
-            "jobTitle": role_match.group(1).title() + " Engineer" if role_match else "Software Engineer",
-            "companyName": company_match.group(1).title() if company_match else "Tech Company",
-            "location": "Remote",
-            "jobDescription": f"Exciting opportunity for {role_match.group(1) if role_match else 'software'} development",
-            "applyUrl": "https://company-careers.com",
-            "userPrompt": user_input
-        }
-        
-        return tools["draft_email"].func(json.dumps(params))
-    
-    else:
-        return "I can help you with: 1) Finding jobs 2) Getting recruiter emails 3) Drafting application emails. Please try: 'Find React jobs in Mumbai' or 'Get recruiter emails for Google'"
+import requests
 
 def process_user_input(user_input: str) -> str:
-    print("\n" + "=" * 80)
-    print(f"[AGENT] New user request received: {user_input}")
-    print("=" * 80)
+    """Process user input and route to appropriate service."""
+    print(f"\n[AGENT] Processing: {user_input}")
+    
+    user_input_lower = user_input.lower()
+    
+    # Job Search Intent
+    if any(word in user_input_lower for word in ['find jobs', 'search jobs', 'job search', 'jobs in', 'jobs for', 'positions']):
+        return handle_job_search(user_input, user_input_lower)
+    
+    # Email Finder Intent
+    elif any(word in user_input_lower for word in ['find emails', 'get emails', 'recruiter emails', 'contact', 'emails for']):
+        return handle_email_finder(user_input, user_input_lower)
+    
+    # Email Draft Intent
+    elif any(word in user_input_lower for word in ['draft email', 'write email', 'compose email', 'create email']):
+        return handle_email_draft(user_input, user_input_lower)
+    
+    else:
+        return "I can help you with:\n1) Finding jobs - Try: 'Find React jobs in Mumbai'\n2) Getting recruiter emails - Try: 'Get recruiter emails for Google'\n3) Drafting application emails - Try: 'Draft email for software engineer at Netflix'"
+
+def handle_job_search(user_input: str, user_input_lower: str) -> str:
+    """Handle job search requests."""
+    print("[AGENT] Intent: JOB_SEARCH")
+    
+    # Extract job role
+    role_match = re.search(r'([\w\s]+?)\s+(?:jobs|developer|engineer|position)', user_input_lower)
+    job_role = role_match.group(1).strip() if role_match else "software engineer"
+    
+    # Extract location
+    location_match = re.search(r'in\s+([\w\s]+?)(?:\s|$)', user_input_lower)
+    location = location_match.group(1).strip() if location_match else "mumbai"
+    
+    params = {
+        "jobRole": job_role,
+        "location": location,
+        "experience": "2"
+    }
+    
+    print(f"[AGENT] Calling job-service with: {params}")
     
     try:
-        print("[AGENT] Analyzing user intent...")
-        print(f"[AGENT] Available tools: {', '.join(tools.keys())}")
+        response = requests.post(
+            'http://job-service:3000/jobs',
+            json=params,
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
         
-        result = determine_intent_and_execute(user_input)
+        jobs = data.get('jobs', [])
+        total = data.get('totalJobs', len(jobs))
         
-        try:
-            result_data = json.loads(result)
-            if result_data.get('success'):
-                if 'jobs' in result_data:
-                    jobs = result_data['jobs']
-                    total_jobs = result_data.get('totalJobs', len(jobs))
-                    response = f"Found {total_jobs} jobs! Here are the matches:\n\n"
-                    for i, job in enumerate(jobs, 1):
-                        apply_url = job.get('applyUrl', '#')
-                        response += f"{i}. {job.get('title', 'N/A')} at {job.get('company', 'N/A')}\n   Location: {job.get('location', 'N/A')}\n   URL: {apply_url}\n\n"
-                elif 'emails' in result_data:
-                    emails = result_data['emails'][:5]
-                    response = f"Found {len(emails)} recruiter emails for {result_data.get('company', 'the company')}:\n\n"
-                    for email in emails:
-                        response += f"• {email.get('email', 'N/A')} ({email.get('confidence', 'unknown')} confidence)\n"
-                elif 'emailText' in result_data:
-                    response = f"Email drafted successfully!\n\nSubject: {result_data.get('emailSubject', 'Job Application')}\n\n{result_data.get('emailText', 'Email content generated')}"
-                else:
-                    response = "Task completed successfully!"
-            else:
-                response = f"Sorry, I encountered an issue: {result_data.get('error', 'Unknown error')}"
-        except:
-            response = result
+        if not jobs:
+            return f"No jobs found for {job_role} in {location}. Try different keywords."
         
-        print("[AGENT] Response generated successfully")
-        print("=" * 80 + "\n")
+        result = f"Found {total} jobs! Here are the matches:\n\n"
+        for i, job in enumerate(jobs[:10], 1):
+            result += f"{i}. {job.get('title', 'N/A')} at {job.get('company', 'N/A')}\n"
+            result += f"   Location: {job.get('location', 'N/A')}\n"
+            result += f"   URL: {job.get('applyUrl', '#')}\n\n"
         
-        return response
+        print(f"[AGENT] Success: {len(jobs)} jobs found")
+        return result
         
-    except Exception as error:
-        print(f"[AGENT] Error during processing: {str(error)}")
-        print("=" * 80 + "\n")
-        return "I encountered an error processing your request. Please try again or be more specific."
+    except Exception as e:
+        print(f"[AGENT] Error: {str(e)}")
+        return f"Sorry, I couldn't search for jobs right now. Error: {str(e)}"
+
+def handle_email_finder(user_input: str, user_input_lower: str) -> str:
+    """Handle email finder requests."""
+    print("[AGENT] Intent: EMAIL_FINDER")
+    
+    # Extract company name
+    company_match = re.search(r'(?:for|at)\s+([\w\s]+?)(?:\s|$)', user_input_lower)
+    company = company_match.group(1).strip() if company_match else "google"
+    
+    print(f"[AGENT] Calling email-finder-service for: {company}")
+    
+    try:
+        response = requests.post(
+            'http://email-finder-service:5000/emails',
+            json={"company": company},
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        
+        emails = data.get('emails', [])
+        
+        if not emails:
+            return f"No emails found for {company}."
+        
+        result = f"Found {len(emails)} recruiter emails for {company}:\n\n"
+        for email in emails[:5]:
+            result += f"• {email.get('email', 'N/A')} ({email.get('confidence', 'unknown')} confidence)\n"
+        
+        print(f"[AGENT] Success: {len(emails)} emails found")
+        return result
+        
+    except Exception as e:
+        print(f"[AGENT] Error: {str(e)}")
+        return f"Sorry, I couldn't find emails right now. Error: {str(e)}"
+
+def handle_email_draft(user_input: str, user_input_lower: str) -> str:
+    """Handle email draft requests."""
+    print("[AGENT] Intent: EMAIL_DRAFT")
+    
+    # Extract company name
+    company_match = re.search(r'(?:for|at)\s+([\w\s]+?)(?:\s|$)', user_input_lower)
+    company = company_match.group(1).strip().title() if company_match else "Tech Company"
+    
+    # Extract job role
+    role_match = re.search(r'([\w\s]+?)\s+(?:engineer|developer|position|job|role)', user_input_lower)
+    job_title = role_match.group(1).strip().title() + " Engineer" if role_match else "Software Engineer"
+    
+    params = {
+        "jobTitle": job_title,
+        "companyName": company,
+        "location": "Remote",
+        "jobDescription": f"Exciting {job_title} opportunity at {company}",
+        "applyUrl": "https://company-careers.com",
+        "userProfile": "Software Engineer with experience in modern web technologies"
+    }
+    
+    print(f"[AGENT] Calling email-service with: {params}")
+    
+    try:
+        response = requests.post(
+            'http://email-service:4000/email/draft',
+            json=params,
+            timeout=30
+        )
+        response.raise_for_status()
+        data = response.json()
+        
+        subject = data.get('emailSubject', 'Job Application')
+        body = data.get('emailText', 'Email content generated')
+        
+        result = f"Email drafted successfully!\n\nSubject: {subject}\n\n{body}"
+        
+        print("[AGENT] Success: Email drafted")
+        return result
+        
+    except Exception as e:
+        print(f"[AGENT] Error: {str(e)}")
+        return f"Sorry, I couldn't draft the email right now. Error: {str(e)}"

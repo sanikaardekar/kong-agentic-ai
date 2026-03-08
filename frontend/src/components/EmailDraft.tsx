@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_ENDPOINTS } from '../config';
 
 interface DraftedEmail {
   success: boolean;
@@ -50,11 +51,10 @@ export const EmailDraft: React.FC<EmailDraftProps> = ({
     setInputValue('');
 
     try {
-      const response = await fetch('http://localhost:8000/email/refine', {
+      const response = await fetch(`${API_ENDPOINTS.EMAIL}/email/refine`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'hackathon-2024-key'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           currentEmail: currentEmail.content,

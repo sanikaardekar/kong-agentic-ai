@@ -80,7 +80,6 @@ async function handleSearch(req: any, res: any) {
     let allJobs: NormalizedJob[] = [];
 
     console.log(`DEBUG: company parameter = '${company}'`);
-    console.log(`DEBUG: company truthy check = ${!!company}`);
 
     if (company) {
       console.log(`DEBUG: COMPANY BRANCH - Searching for ${jobRole} at ${company} only`);
@@ -93,7 +92,7 @@ async function handleSearch(req: any, res: any) {
         allJobs.push(...filtered);
         console.log(`Found ${filtered.length} Greenhouse jobs at ${company}`);
       } catch (err) {
-        console.log(`Greenhouse fetch failed for ${company}:`, err);
+        console.error(`Greenhouse fetch failed for ${company}:`, err);
       }
 
       try {
@@ -114,7 +113,7 @@ async function handleSearch(req: any, res: any) {
         allJobs.push(...indeedJobs);
         console.log(`Found ${indeedJobs.length} Indeed jobs`);
       } catch (err) {
-        console.log("Indeed fetch failed:", err);
+        console.error("Indeed fetch failed:", err);
       }
 
       try {
@@ -122,7 +121,7 @@ async function handleSearch(req: any, res: any) {
         allJobs.push(...naukriJobs);
         console.log(`Found ${naukriJobs.length} Naukri jobs`);
       } catch (err) {
-        console.log("Naukri fetch failed:", err);
+        console.error("Naukri fetch failed:", err);
       }
       
       console.log(`Found ${allJobs.length} total jobs from all sources`);

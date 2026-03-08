@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../config';
 
 interface Email {
   email: string;
@@ -20,11 +21,10 @@ export const EmailPopup: React.FC<EmailPopupProps> = ({ company, onClose, onCopy
   useEffect(() => {
     const fetchEmails = async () => {
       try {
-        const response = await fetch('http://localhost:8000/emails', {
+        const response = await fetch(`${API_ENDPOINTS.EMAIL_FINDER}/emails`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'apikey': 'hackathon-2024-key'
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ company })
         });

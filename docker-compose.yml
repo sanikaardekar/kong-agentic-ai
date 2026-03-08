@@ -7,6 +7,8 @@ services:
     environment:
       - NODE_ENV=production
       - SERPAPI_KEY=${SERPAPI_KEY}
+    networks:
+      - app-network
 
   email-service:
     build: ./email-service
@@ -19,6 +21,8 @@ services:
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
       - OLLAMA_URL=http://host.docker.internal:11434
       - OLLAMA_MODEL=llama2
+    networks:
+      - app-network
 
   email-finder-service:
     build: ./email-finder-service
@@ -29,45 +33,25 @@ services:
       - NODE_ENV=production
       - HUNTER_API_KEY=${HUNTER_API_KEY}
       - CLEARBIT_API_KEY=${CLEARBIT_API_KEY}
+    networks:
+      - app-network
 
   agent-service:
     build: ./agent-service
     container_name: agent-service
     ports:
-      - "6000:6000"
+      - "6001:6001"
     environment:
+      - PORT=6001
       - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
       - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
-
-  ai-gateway-service:
-    build: ./ai-gateway-service
-    container_name: ai-gateway-service
-    ports:
-      - "7000:7000"
-    environment:
-      - NODE_ENV=production
-      - CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}
-      - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-
-  kong-ai:
-    image: kong:3.9
-    container_name: kong-ai-gateway
+    networks:
+      - app-network
     depends_on:
       - job-service
       - email-service
       - email-finder-service
-      - agent-service
-      - ai-gateway-service
-    environment:
-      KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /etc/kong/kong-ai.yaml
-      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
-      KONG_ADMIN_LISTEN: 0.0.0.0:8001
-    volumes:
-      - ./kong/kong-ai.yaml:/etc/kong/kong-ai.yaml:ro
-    ports:
-      - "8000:8000"  # proxy (HTTP)
-      - "8443:8443"  # proxy (HTTPS)
-      - "8001:8001"  # admin API (HTTP)
+
+networks:
+  app-network:
+    driver: bridge
