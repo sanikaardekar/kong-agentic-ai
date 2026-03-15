@@ -339,6 +339,15 @@ def save_json(jobs: list, path: str) -> None:
         json.dump(jobs, f, indent=2, ensure_ascii=False)
     print(f"[INFO] Saved {len(jobs)} jobs → {path}")
 
+def deduplicate_jobs(jobs: list) -> list:
+    seen = set()
+    unique_jobs = []
+    for job in jobs:
+        identifier = (job["company"], job["title"], job["location"], job["url"])
+        if identifier not in seen:
+            seen.add(identifier)
+            unique_jobs.append(job)
+    return unique_jobs
 
 def print_jobs(jobs: list) -> None:
     if not jobs:
@@ -388,14 +397,17 @@ def main() -> None:
         max_pages=args.pages,
         headless=not args.no_headless,
     )
+    unique_jobs = deduplicate_jobs(jobs)
 
-    print_jobs(jobs)
+    print_jobs(unique_jobs)
 
-    if jobs:
+    print(f"\n[INFO] Total jobs scraped (before deduplication): {len(jobs)}")
+    print(f"[INFO] Total jobs scraped (after deduplication): {len(unique_jobs)}")
+    if unique_jobs:
         if out_file.endswith(".json"):
-            save_json(jobs, out_file)
+            save_json(unique_jobs, out_file)
         else:
-            save_csv(jobs, out_file)
+            save_csv(unique_jobs, out_file)
     else:
         print("[INFO] Nothing to save.")
 
