@@ -7,12 +7,18 @@ import { fetchGreenhouseJobDetail } from "./sources/greenhouse-detail.js";
 import { fetchLeverJobs } from "./sources/lever.js";
 import { fetchIndeedJobs } from "./sources/indeed.js";
 import { fetchNaukriJobs } from "./sources/naukri.js";
+import { connectToMongoDB, getJobsCollection } from "./db.js";
 import type { NormalizedJob, Source } from "./types.js";
 
 const app = express();
 app.use(morgan("dev"));
 app.use(cors());
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "10mb" }));
+
+// Connect to MongoDB on startup
+connectToMongoDB().catch(err => {
+  console.error('Failed to connect to MongoDB:', err);
+});
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
@@ -62,6 +68,62 @@ app.post("/jobs", async (req, res) => {
     return handleSearch(req, res);
   }
   return res.status(400).json({ error: "Invalid request" });
+});
+
+// Bulk insert endpoint for scrapers
+app.post("/jobs/bulk", async (req, res) => {
+  try {
+    const { jobs, source } = req.body;
+    
+    if (!jobs || !Array.isArray(jobs)) {
+      return res.status(400).json({ 
+        error: "Invalid request", 
+        message: "Expected { jobs: [...], source: 'scraper-name' }" 
+      });
+    }
+
+    if (jobs.length === 0) {
+      return res.json({ success: true, inserted: 0, message: "No jobs to insert" });
+    }
+
+    const jobsCollection = getJobsCollection();
+    
+    // Add metadata to each job
+    const jobsWithMetadata = jobs.map(job => ({
+      ...job,
+      jobId: job.id || `${job.company}-${job.title}-${Date.now()}`.replace(/\s+/g, '-').toLowerCase(),
+      source: source || job.source || 'scraper',
+      scrapedAt: new Date(),
+      createdAt: job.createdAt || new Date()
+    }));
+
+    // Use bulkWrite for upsert (insert or update)
+    const bulkOps = jobsWithMetadata.map(job => ({
+      updateOne: {
+        filter: { jobId: job.jobId },
+        update: { $set: job },
+        upsert: true
+      }
+    }));
+
+    const result = await jobsCollection.bulkWrite(bulkOps);
+
+    console.log(`✓ Bulk insert: ${result.upsertedCount} new, ${result.modifiedCount} updated`);
+
+    res.json({
+      success: true,
+      inserted: result.upsertedCount,
+      updated: result.modifiedCount,
+      total: jobs.length
+    });
+
+  } catch (error: any) {
+    console.error('Bulk insert error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Failed to insert jobs' 
+    });
+  }
 });
 
 async function handleSearch(req: any, res: any) {
