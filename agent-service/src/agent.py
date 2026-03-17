@@ -101,9 +101,9 @@ def handle_job_search(params: dict) -> str:
     print(f"[AGENT] Calling job-service with: {search_params}")
     
     try:
-        response = requests.post(
+        response = requests.get(
             'http://job-service:3000/jobs',
-            json=search_params,
+            params=search_params,
             timeout=30
         )
         response.raise_for_status()

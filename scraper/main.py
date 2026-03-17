@@ -34,6 +34,8 @@ import random
 import argparse
 from datetime import datetime
 from urllib.parse import urlencode
+import hashlib
+import requests
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -344,8 +346,10 @@ def deduplicate_jobs(jobs: list) -> list:
     unique_jobs = []
     for job in jobs:
         identifier = (job["company"], job["title"], job["location"], job["url"])
+        unique_key = cryptographic_hash("|".join(identifier))
         if identifier not in seen:
             seen.add(identifier)
+            job['id'] = unique_key  # Add a unique ID field for database storage
             unique_jobs.append(job)
     return unique_jobs
 
@@ -366,6 +370,16 @@ def print_jobs(jobs: list) -> None:
         print(f"       URL      : {j['url']}")
     print(f"\n{sep}\n")
 
+def cryptographic_hash(data):
+    """Generates a universally consistent SHA256 hash."""
+    # Encode the string to bytes, as hashlib requires bytes input
+    encoded_data = data.encode('utf-8')
+    # Create a SHA256 hash object
+    hasher = hashlib.sha256()
+    # Update the hash object with the data
+    hasher.update(encoded_data)
+    # Return the hexadecimal representation of the hash
+    return hasher.hexdigest()
 
 # ── CLI ────────────────────────────────────────────────────────────────────────
 
@@ -405,6 +419,16 @@ def main() -> None:
     print(f"[INFO] Total jobs scraped (after deduplication): {len(unique_jobs)}")
     if unique_jobs:
         if out_file.endswith(".json"):
+            try:
+                print("Uploading Scraped DB to MongoDB")
+                data = {
+                    "jobs": unique_jobs,
+                    "source": 'linkedin-scraper'
+                }
+                response = requests.post("http://localhost:3000/jobs", json=data)
+                print(response.text)
+            except:
+                print("Error Uploading to MongoDB")
             save_json(unique_jobs, out_file)
         else:
             save_csv(unique_jobs, out_file)

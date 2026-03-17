@@ -1,5 +1,9 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 let client: MongoClient | null = null;
 let db: Db | null = null;
 
@@ -7,7 +11,7 @@ export async function connectToMongoDB(): Promise<Db> {
   if (db) {
     return db;
   }
-
+  
   const mongoUri = process.env.MONGODB_URI;
   
   if (!mongoUri) {
@@ -22,12 +26,7 @@ export async function connectToMongoDB(): Promise<Db> {
     console.log('✓ Connected to MongoDB Atlas');
     
     // Create indexes
-    const jobsCollection = db.collection('jobs');
-    await jobsCollection.createIndex({ jobId: 1 }, { unique: true });
-    await jobsCollection.createIndex({ company: 1 });
-    await jobsCollection.createIndex({ location: 1 });
-    await jobsCollection.createIndex({ createdAt: -1 });
-    
+    const jobsCollection = db.collection('jobs');    
     return db;
   } catch (error) {
     console.error('MongoDB connection error:', error);
