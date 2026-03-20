@@ -425,7 +425,7 @@ def main() -> None:
                     "jobs": unique_jobs,
                     "source": 'linkedin-scraper'
                 }
-                response = requests.post("http://localhost:3000/jobs", json=data)
+                response = requests.post("http://localhost:3000/mongoData", json=data)
                 print(response.text)
             except:
                 print("Error Uploading to MongoDB")

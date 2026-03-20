@@ -14,7 +14,7 @@ async function testServices() {
   for (const service of services) {
     try {
       const response = await axios.get(service.url, { timeout: 5000 });
-      console.log(`✓ ${service.name}: OK`);
+      console.log(`✓ ${service.name}: OK - ${JSON.stringify(response.data)}`);
     } catch (error) {
       console.log(`✗ ${service.name}: FAILED - ${error.message}`);
     }
@@ -25,7 +25,7 @@ async function testServices() {
     const response = await axios.post(`${API.AGENT}/chat`, {
       message: 'Hello'
     }, { timeout: 10000 });
-    console.log('✓ Agent Chat: OK');
+    console.log('✓ Agent Chat: OK'+ JSON.stringify(response.data));
   } catch (error) {
     console.log(`✗ Agent Chat: FAILED - ${error.message}`);
   }

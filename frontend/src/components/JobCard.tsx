@@ -27,7 +27,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, index, onDraftEmail, draf
         <span className="source">via {job.source}</span>
       </div>
       <div className="job-description">
-        <p>{job.jobDescription.substring(0, 200)}...</p>
+        <p>{(job.jobDescription || `${job.title} position at ${job.company}`).substring(0, 200)}...</p>
       </div>
       <div className="job-actions">
         <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="apply-btn">

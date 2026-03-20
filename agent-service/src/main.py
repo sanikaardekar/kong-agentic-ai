@@ -20,15 +20,11 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
 
-class ChatResponse(BaseModel):
-    success: bool
-    response: str
-
 @app.get("/health")
 async def health_check():
     return {"ok": True, "service": "agent-service"}
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     print(f"\n[API] Received: {request.message}")
     
@@ -36,14 +32,16 @@ async def chat_endpoint(request: ChatRequest):
         if not request.message.strip():
             raise HTTPException(status_code=400, detail="Message cannot be empty")
         
-        response = process_user_input(request.message)
+        result = process_user_input(request.message)
         
         print(f"[API] Sending response\n")
         
-        return ChatResponse(
-            success=True,
-            response=response
-        )
+        return {
+            "success": True,
+            "response": result.get("response", ""),
+            "jobs": result.get("jobs", []),
+            "intent": result.get("intent", "unknown")
+        }
         
     except Exception as err:
         print(f"[API] Error: {str(err)}")

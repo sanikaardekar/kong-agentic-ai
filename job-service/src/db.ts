@@ -1,9 +1,5 @@
 import { MongoClient, Db, Collection } from 'mongodb';
 
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 let client: MongoClient | null = null;
 let db: Db | null = null;
 
@@ -19,7 +15,11 @@ export async function connectToMongoDB(): Promise<Db> {
   }
 
   try {
-    client = new MongoClient(mongoUri);
+    client = new MongoClient(mongoUri, {
+      tls: true,
+      tlsAllowInvalidCertificates: false,
+      serverSelectionTimeoutMS: 10000
+    });
     await client.connect();
     db = client.db('job-search-db');
     

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config';
+import { Job } from '../types';
 
 interface AgentChatProps {
-  onResponse: (response: string) => void;
+  onResponse: (response: string, jobs: Job[]) => void;
 }
 
 export const AgentChat: React.FC<AgentChatProps> = ({ onResponse }) => {
@@ -25,12 +26,12 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onResponse }) => {
 
       const data = await response.json();
       if (data.success) {
-        onResponse(data.response);
+        onResponse(data.response, data.jobs ?? []);
       } else {
-        onResponse('Sorry, I encountered an error processing your request.');
+        onResponse('Sorry, I encountered an error processing your request.', []);
       }
     } catch (error) {
-      onResponse('Sorry, I could not connect to the agent service.');
+      onResponse('Sorry, I could not connect to the agent service.', []);
     } finally {
       setLoading(false);
       setInput('');
