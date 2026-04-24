@@ -255,6 +255,9 @@ Serve the `frontend/build` folder with nginx or deploy to Vercel/Netlify.
 
 ## Usage Examples
 
+### Homepage
+![Homepage](images/homepage_new.png)
+
 ### AI Search Tab
 ```
 "Find React developer jobs in Mumbai"
@@ -269,9 +272,24 @@ Serve the `frontend/build` folder with nginx or deploy to Vercel/Netlify.
 → Detects: email_draft | jobTitle: software engineer | company: netflix
 → Opens email modal with subject + body, supports AI refinement
 ```
+![AI Search](images/ai_search_new.png)
 
 ### Manual Search Tab
 Fill in Job Role, Experience, Location (and optionally Company) to search live APIs directly.
 
+![Manual Search](images/manual_search_new.png)
+
+### Get Recruiter Emails
+Click **Get Recruiter Emails** on any job card, or ask the AI directly.
+
+![Get Emails](images/get_emails_new.png)
+
+### Email Draft + Refinement
+Click **Draft Email** on any job card to generate a personalized email. Use the refine input to iteratively improve it with AI.
+
+![Draft Email](images/draft_email_chat_mode_new.png)
+
 ### LinkedIn Scraped Tab
 Click **Load Jobs** to fetch all jobs scraped from LinkedIn and stored in MongoDB.
+
+![LinkedIn Jobs](images/linkedin_jobs_new.png)
