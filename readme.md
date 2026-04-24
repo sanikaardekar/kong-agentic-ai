@@ -5,7 +5,7 @@ An intelligent job search platform powered by multi-provider AI agents that can 
 #### Members
 - Sanika Ardekar (sanikaardekar@gmail.com)
 
-<!-- #### [Video Demo](https://youtu.be/f8rd3Q4T1AA) -->
+#### [Video Demo](https://youtu.be/4Kr20ZH6jx0)
 
 ---
 
