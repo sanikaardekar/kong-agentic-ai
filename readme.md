@@ -1,17 +1,15 @@
 # Agentic Job Search Assistant
 
-An intelligent job search platform powered by Kong AI Gateway and multi-provider AI agents that can search for jobs, find recruiter emails, and draft professional application emails based on the JD, refine it further, all through the same application without the need to switch tabs, through natural language conversations with an intelligent AI model routing and fallback support.
+An intelligent job search platform powered by multi-provider AI agents that can search for jobs, find recruiter emails, and draft professional application emails through natural language conversations.
 
 #### Members
 - Sanika Ardekar (sanikaardekar@gmail.com)
-- Prachet Shah (prachetshah25@gmail.com)
 
 #### [Video Demo](https://youtu.be/4Kr20ZH6jx0)
 
+---
 
 ## Problem Statement & Agentic AI Connection
-
-### What Problem Does It Solve?
 
 Job searching is a complex, multi-step process that typically requires:
 - **Manual Platform Navigation**: Switching between multiple job sites (Indeed, Naukri, LinkedIn)
@@ -19,11 +17,9 @@ Job searching is a complex, multi-step process that typically requires:
 - **Personalized Email Crafting**: Writing tailored application emails for each position
 - **Context Switching**: Managing information across different tools and platforms
 
-This creates friction, inefficiency, and missed opportunities for job seekers.
+This is where Agentic AI comes in — autonomous agents that understand user intent, orchestrate multi-step workflows, and adapt dynamically. Instead of juggling multiple platforms, the system uses natural language to search jobs, find recruiter emails, and draft personalized applications.
 
-This is where Agentic AI comes in, enabling autonomous agents that understand user intent, orchestrate multi-step workflows, and adapt dynamically. Instead of juggling multiple platforms, the system uses natural language to search jobs, find recruiter emails, and draft personalized applications, while preserving context and ensuring seamless execution.
-
-A single conversational interface that replaces hours of manual work with intelligent, autonomous task execution.
+---
 
 ## Architecture Overview
 
@@ -32,93 +28,108 @@ graph TB
     subgraph "Frontend Layer"
         FE[React Frontend<br/>Port: 3001]
     end
-    
-    subgraph "Kong AI Gateway Layer"
-        KONG[Kong AI Gateway<br/>Port: 8000<br/>API Key Auth + AI Routing]
-    end
-    
+
     subgraph "Microservices"
-        AGENT[Agent Service<br/>Port: 6000<br/>Python + FastAPI]
-        JOB[Job Service<br/>Port: 3000<br/>Node.js + Express]
+        AGENT[Agent Service<br/>Port: 6001<br/>Python + FastAPI<br/>Cloudflare AI Intent Detection]
+        JOB[Job Service<br/>Port: 3000<br/>Node.js + Express<br/>Greenhouse · Lever · Indeed · Naukri · MongoDB]
         EMAIL[Email Service<br/>Port: 4000<br/>Node.js + Express]
         FINDER[Email Finder Service<br/>Port: 5000<br/>Node.js + Express]
-        AIGATEWAY[AI Gateway Service<br/>Port: 7000<br/>Multi-Provider AI Router]
     end
-    
-    subgraph "AI/LLM Providers"
+
+    subgraph "AI Provider"
         CF[Cloudflare AI<br/>Llama 3.3 70B]
-        OPENAI[OpenAI<br/>GPT-4]
-        ANTHROPIC[Anthropic<br/>Claude 3]
     end
-    
-    subgraph "External APIs"
-        INDEED[Indeed Jobs API]
-        NAUKRI[Naukri Jobs API]
-        SERPAPI[SerpAPI<br/>Google Search]
-        HUNTER[Hunter.io<br/>Email Finder]
+
+    subgraph "Data Sources"
+        GH[Greenhouse API]
+        LV[Lever API]
+        IN[Indeed RapidAPI]
+        NK[Naukri RapidAPI]
+        MG[MongoDB Atlas<br/>Scraped Jobs]
+        LI[LinkedIn Scraper<br/>Selenium]
     end
-    
-    FE --> KONG
-    KONG --> AGENT
-    KONG --> JOB
-    KONG --> EMAIL
-    KONG --> FINDER
-    KONG --> AIGATEWAY
-    
-    AGENT --> AIGATEWAY
-    EMAIL --> AIGATEWAY
-    
-    AIGATEWAY --> CF
-    AIGATEWAY --> OPENAI
-    AIGATEWAY --> ANTHROPIC
-    
-    JOB --> INDEED
-    JOB --> NAUKRI
-    FINDER --> SERPAPI
-    FINDER --> HUNTER
-    
+
+    FE --> AGENT
+    FE --> JOB
+    FE --> EMAIL
+    FE --> FINDER
+
+    AGENT --> CF
+    AGENT --> JOB
+    AGENT --> EMAIL
+    AGENT --> FINDER
+
+    EMAIL --> CF
+
+    JOB --> GH
+    JOB --> LV
+    JOB --> IN
+    JOB --> NK
+    JOB --> MG
+
+    LI --> MG
+
     style FE fill:#e1f5fe
-    style KONG fill:#fff3e0
     style AGENT fill:#f3e5f5
-    style AIGATEWAY fill:#e8f5e8
     style CF fill:#f1f8e9
-    style OPENAI fill:#f1f8e9
-    style ANTHROPIC fill:#f1f8e9
+    style MG fill:#fff3e0
+    style LI fill:#e8f5e9
 ```
+
+---
 
 ## Features
 
-### Kong AI Gateway 
-**Orchestrates multi-provider AI routing with intelligent fallback between Cloudflare AI, OpenAI, and Anthropic for maximum reliability and performance.**
+### AI Search (Agent Service)
+Uses Cloudflare AI (Llama 3.3 70B) to detect intent from natural language and route to the right service:
+- `job_search` → calls `POST /jobs` on job-service
+- `email_finder` → calls `POST /emails` on email-finder-service
+- `email_draft` → calls `POST /email/draft` on email-service
 
-### Service Functions 
-- **Agent Service**: Processes natural language queries and routes to appropriate microservices
-- **Job Service**: Aggregates job listings from Indeed, Naukri, and other platforms
-- **Email Finder**: Discovers recruiter contacts using Google Search and Hunter.io APIs
-- **Email Service**: Generates personalized application emails via Kong AI Gateway
-- **AI Gateway Service**: Manages multi-provider AI routing with automatic failover
+### Job Search (Job Service)
+- **Live search** via `POST /jobs` — searches Greenhouse, Lever, Indeed, Naukri based on role/location/company
+- **MongoDB GET** via `GET /mongoData` — fetch scraped jobs stored in MongoDB Atlas
+- **MongoDB POST** via `POST /mongoData` — bulk upsert jobs from the scraper
+
+### LinkedIn Scraper
+Headless Chrome (Selenium) scraper that collects LinkedIn job listings and pushes them to MongoDB via `POST /mongoData`. Run independently from the `scraper/` directory.
+
+### Email Finder
+Discovers recruiter contacts for a given company. Currently generates realistic dummy data. Can be extended with Hunter.io or Clearbit APIs.
+
+### Email Drafting + Refinement
+Generates personalized application emails using Cloudflare AI. Supports iterative refinement — tell the AI how to improve the draft and it generates a new version.
+
+---
 
 ## Technology Stack
 
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| **Frontend** | React + TypeScript | User interface and interaction |
-| **AI Gateway** | Kong AI Gateway | AI request routing, model switching, prompt management |
-| **API Gateway** | Kong Gateway | Request routing, authentication, rate limiting |
-| **Agent Service** | Python + FastAPI + LangChain | AI agent orchestration |
-| **AI Gateway Service** | Node.js + Express | Multi-provider AI routing and fallback |
-| **Job Service** | Node.js + Express | Job search and aggregation |
-| **Email Service** | Node.js + Express | Email drafting via AI Gateway |
+| **Frontend** | React + TypeScript | Tabbed UI — AI Search, Manual Search, LinkedIn Scraped Jobs |
+| **Agent Service** | Python + FastAPI | Cloudflare AI intent detection and service orchestration |
+| **Job Service** | Node.js + Express + MongoDB | Live job search (Greenhouse/Lever/Indeed/Naukri) + scraped jobs storage |
+| **Email Service** | Node.js + Express | Email drafting and refinement using Cloudflare AI |
 | **Email Finder** | Node.js + Express | Recruiter email discovery |
-| **AI Providers** | Cloudflare AI, OpenAI, Anthropic | Multiple LLM providers for reliability |
-| **Intent Detection** | Python Regex + LangChain | User intent classification |
-| **Containerization** | Docker + Docker Compose | Deployment and orchestration |
+| **Scraper** | Python + Selenium | LinkedIn job scraper → MongoDB |
+| **AI Provider** | Cloudflare AI (Llama 3.3 70B) | Intent detection and email generation |
+| **Database** | MongoDB Atlas | Storage for LinkedIn scraped jobs |
+| **Containerization** | Docker + Docker Compose | Backend service orchestration |
 
-### Test Commands
-Try these in the AI chat at http://localhost:3001:
-- "Find React jobs in Mumbai"
-- "Get recruiter emails for Google"
-- "Draft email for software engineer position"
+---
+
+## Job Service API Routes
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/health` | Health check |
+| `POST` | `/jobs` | Live job search (Greenhouse, Lever, Indeed, Naukri) |
+| `GET` | `/jobs` | Source-specific job fetch (`?source=greenhouse&token=...`) |
+| `GET` | `/job/:source/:id` | Single job detail |
+| `GET` | `/mongoData` | Fetch scraped jobs from MongoDB (supports `?jobRole`, `?location`, `?company`, `?limit`) |
+| `POST` | `/mongoData` | Bulk upsert scraped jobs `{ jobs: [...], source: "linkedin-scraper" }` |
+
+---
 
 ## Quick Start
 
@@ -130,117 +141,155 @@ cd kong-agentic-ai
 
 ### 2. Configure Environment
 ```bash
-# Copy and edit environment variables
 cp .env.example .env
+cd frontend && cp .env.example .env && cd ..
 ```
 
-Required environment variables:
+Required backend `.env` variables:
 ```env
 # Cloudflare AI (Required)
 CLOUDFLARE_ACCOUNT_ID=your_account_id
 CLOUDFLARE_API_TOKEN=your_api_token
 
-SERPAPI_KEY=your_serpapi_key          # For Google search-based email finding
-HUNTER_API_KEY=your_hunter_api_key    # For professional email discovery
-CLEARBIT_API_KEY=your_clearbit_api_key # For company domain lookup
+# MongoDB Atlas (Required for scraped jobs)
+MONGODB_URI=your_mongodb_connection_string
+
+# Optional: for real email finding
+HUNTER_API_KEY=your_hunter_api_key
+CLEARBIT_API_KEY=your_clearbit_api_key
+SERPAPI_KEY=your_serpapi_key
 ```
 
-### 3. Start Services
-```bash
-# Start all backend services (including Kong AI Gateway)
-docker-compose up -d
+Frontend `.env`:
+```env
+REACT_APP_API_BASE_URL=http://localhost
+```
 
-# Start frontend (in separate terminal)
+### 3. Start Backend Services
+```bash
+docker-compose up -d
+```
+
+### 4. Start Frontend
+```bash
 cd frontend
 npm install
 npm start
 ```
 
-### 4. Access Application
-- **Frontend**: http://localhost:3001
-- **Kong AI Gateway**: http://localhost:8000
-- **AI Chat Endpoint**: http://localhost:8000/ai/chat
-- **AI Providers**: http://localhost:8000/ai/providers
-- **Health Checks**: http://localhost:8000/health
+### 5. Access Application
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3001 |
+| Agent Service | http://localhost:6001 |
+| Job Service | http://localhost:3000 |
+| Email Service | http://localhost:4000 |
+| Email Finder | http://localhost:5000 |
 
-## Quick Commands
+---
 
-### Start Everything
+## LinkedIn Scraper
+
+The scraper runs independently and pushes jobs to MongoDB.
+
 ```bash
-# Start all backend services
-docker-compose up
+cd scraper
+pip install -r requirements.txt
 
-# Start frontend (new terminal)
-cd frontend
-npm start
+# Default search (software developer, Mumbai/Bangalore)
+python main.py --output jobs.json
+
+# Custom search
+python main.py --keywords "React developer" --location "Bangalore, India" --pages 3 --output jobs.json
+
+# Show browser window (useful if hitting CAPTCHA)
+python main.py --no-headless
 ```
 
-## Usage Examples along with Demo Screenshots (Video in end)
+Jobs are automatically uploaded to `http://localhost:3000/mongoData` and appear in the **LinkedIn Scraped** tab in the frontend.
+
+---
+
+## Troubleshooting
+
+**Services not starting:**
+```bash
+docker-compose ps
+docker-compose logs agent-service
+docker-compose down && docker-compose up -d
+```
+
+**Test all services:**
+```bash
+node test-services.js
+node test-agent.js
+```
+
+**MongoDB connection error (SSL):**
+Ensure your `MONGODB_URI` includes `?tls=true&retryWrites=true&w=majority` and the job-service Dockerfile uses `node:20-slim` (not alpine).
+
+**Agent returning "unknown" intent:**
+Check Cloudflare credentials in `.env` and verify with:
+```bash
+docker-compose logs agent-service --tail=20
+```
+
+---
+
+## Deployment
+
+```bash
+# Update frontend API URL
+echo "REACT_APP_API_BASE_URL=http://your-server-ip" > frontend/.env
+
+# Build frontend
+cd frontend && npm run build
+
+# Start backend
+docker-compose up -d
+```
+
+Serve the `frontend/build` folder with nginx or deploy to Vercel/Netlify.
+
+---
+
+## Usage Examples
 
 ### Homepage
-![Homepage](images/homepage.png)
+![Homepage](images/homepage_new.png)
 
-
-### Job Search with AI Enhancement
+### AI Search Tab
 ```
-User: "Find React developer jobs in Mumbai"
-Agent: [INTENT] Detected: JOB_SEARCH
-       [AI_GATEWAY] Using Cloudflare AI for processing
-       Searching for React jobs in Mumbai...
-       Found 15 jobs! Here are the matches:
-       
-       1. React Developer at TechCorp
-          Location: Mumbai, Maharashtra
-          [Apply Here]
-       
-       2. Frontend Engineer at StartupXYZ
-          Location: Mumbai, Maharashtra  
-          [Apply Here]
+"Find React developer jobs in Mumbai"
+→ Detects: job_search | jobRole: react | location: mumbai
+→ Returns job cards with Apply, Draft Email, Get Recruiter Emails buttons
+
+"Get recruiter emails for Google"
+→ Detects: email_finder | company: google
+→ Returns list of recruiter emails with confidence scores
+
+"Draft email for software engineer at Netflix"
+→ Detects: email_draft | jobTitle: software engineer | company: netflix
+→ Opens email modal with subject + body, supports AI refinement
 ```
-![Job Search Demo](images/react-jobs.png)
+![AI Search](images/ai_search_new.png)
 
-### Email Discovery (Either via found jobs, or directly via Agent)
-```
-User: "Get recruiter emails for Google"
-Agent: [INTENT] Detected: EMAIL_FINDER
-       Searching emails for Google...
-       Found 5 recruiter emails:
-       
-       - recruiter@google.com (high confidence)
-       - talent@google.com (medium confidence)
-       - hiring@google.com (high confidence)
-```
-#### Emails via Found Jobs (Clicking on get Recruiter Emails)
-![Get Emails](images/get-emails-click.png)
+### Manual Search Tab
+Fill in Job Role, Experience, Location (and optionally Company) to search live APIs directly.
 
-#### Emails via Agent(using prompt)
-![Get Emails](images/get-emails-agent.png)
+![Manual Search](images/manual_search_new.png)
 
-### Email Drafting with AI Provider Selection (customised based on JD of Job)
-```
-User: "Draft email for Netflix software engineer position using Claude"
-Agent: [INTENT] Detected: EMAIL_DRAFT
-       [AI_GATEWAY] Routing to Anthropic Claude for email generation
-       Drafting professional email with Claude 3...
-       Email drafted successfully!
-       
-       Subject: Application for Software Engineer Position
-       
-       Dear Hiring Manager,
-       
-       I hope this email finds you well. I came across the Software Engineer 
-       position at Netflix and I am very excited about the opportunity...
-       
-       Generated by: anthropic:claude-3-sonnet-20240229
-```
-![Draft Email](images/draft-email-click.png)
+### Get Recruiter Emails
+Click **Get Recruiter Emails** on any job card, or ask the AI directly.
 
-## Monitoring & Logs
+![Get Emails](images/get_emails_new.png)
 
-![System Logs 1](images/logs-1.png)
-![System Logs 2](images/logs-2.png)
+### Email Draft + Refinement
+Click **Draft Email** on any job card to generate a personalized email. Use the refine input to iteratively improve it with AI.
 
-## Manual Search Functionality without Prompting
+![Draft Email](images/draft_email_chat_mode_new.png)
 
-![Manual Interface](images/manual-search-1.png)
-![Manual Interface 2](images/manual-search-2.png)
+### LinkedIn Scraped Tab
+Click **Load Jobs** to fetch all jobs scraped from LinkedIn and stored in MongoDB.
+
+![LinkedIn Jobs](images/linkedin_jobs_new.png)

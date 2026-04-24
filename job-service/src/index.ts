@@ -8,11 +8,14 @@ import { fetchLeverJobs } from "./sources/lever.js";
 import { fetchIndeedJobs } from "./sources/indeed.js";
 import { fetchNaukriJobs } from "./sources/naukri.js";
 import type { NormalizedJob, Source } from "./types.js";
+import { connectToMongoDB, getJobsCollection } from "./db.js";
 
 const app = express();
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
+
+connectToMongoDB().catch(err => console.error("MongoDB connection error:", err.message));
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
@@ -80,7 +83,6 @@ async function handleSearch(req: any, res: any) {
     let allJobs: NormalizedJob[] = [];
 
     console.log(`DEBUG: company parameter = '${company}'`);
-    console.log(`DEBUG: company truthy check = ${!!company}`);
 
     if (company) {
       console.log(`DEBUG: COMPANY BRANCH - Searching for ${jobRole} at ${company} only`);
@@ -93,7 +95,7 @@ async function handleSearch(req: any, res: any) {
         allJobs.push(...filtered);
         console.log(`Found ${filtered.length} Greenhouse jobs at ${company}`);
       } catch (err) {
-        console.log(`Greenhouse fetch failed for ${company}:`, err);
+        console.error(`Greenhouse fetch failed for ${company}:`, err);
       }
 
       try {
@@ -114,7 +116,7 @@ async function handleSearch(req: any, res: any) {
         allJobs.push(...indeedJobs);
         console.log(`Found ${indeedJobs.length} Indeed jobs`);
       } catch (err) {
-        console.log("Indeed fetch failed:", err);
+        console.error("Indeed fetch failed:", err);
       }
 
       try {
@@ -122,7 +124,7 @@ async function handleSearch(req: any, res: any) {
         allJobs.push(...naukriJobs);
         console.log(`Found ${naukriJobs.length} Naukri jobs`);
       } catch (err) {
-        console.log("Naukri fetch failed:", err);
+        console.error("Naukri fetch failed:", err);
       }
       
       console.log(`Found ${allJobs.length} total jobs from all sources`);
@@ -214,6 +216,45 @@ app.get("/jobs", async (req, res) => {
   } catch (err: any) {
     console.error(err);
     res.status(502).json({ error: err?.message ?? "upstream error" });
+  }
+});
+
+// GET /mongoData - fetch scraped jobs from MongoDB
+app.get("/mongoData", async (req, res) => {
+  try {
+    const { jobRole, location, company, limit = "20" } = req.query;
+    const filter: Record<string, any> = {};
+    if (jobRole) filter.title = { $regex: jobRole, $options: "i" };
+    if (location) filter.location = { $regex: location, $options: "i" };
+    if (company) filter.company = { $regex: company, $options: "i" };
+    const jobs = await getJobsCollection().find(filter).sort({ scrapedAt: -1 }).limit(parseInt(limit as string)).toArray();
+    res.json({ success: true, totalJobs: jobs.length, jobs });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message ?? "Failed to fetch jobs" });
+  }
+});
+
+// POST /mongoData - bulk upsert scraped jobs
+app.post("/mongoData", async (req, res) => {
+  try {
+    const { jobs, source } = req.body;
+    if (!jobs || !Array.isArray(jobs) || jobs.length === 0) {
+      return res.status(400).json({ success: false, error: "Expected { jobs: [...], source: 'scraper-name' }" });
+    }
+    const bulkOps = jobs.map(job => {
+      const jobId = job.jobId || job.id || `${String(job.company).slice(0,10)}-${String(job.title).slice(0,10)}`.replace(/\s+/g, "-").toLowerCase();
+      return {
+        updateOne: {
+          filter: { jobId },
+          update: { $set: { ...job, jobId, source: source || job.source || "scraper", scrapedAt: new Date() } },
+          upsert: true
+        }
+      };
+    });
+    const result = await getJobsCollection().bulkWrite(bulkOps);
+    res.json({ success: true, inserted: result.upsertedCount, updated: result.modifiedCount, total: jobs.length });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message ?? "Failed to upsert jobs" });
   }
 });
 

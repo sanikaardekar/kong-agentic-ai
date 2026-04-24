@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { API_ENDPOINTS } from '../config';
+import { Job } from '../types';
 
 interface AgentChatProps {
-  onResponse: (response: string) => void;
+  onResponse: (response: string, jobs: Job[]) => void;
 }
 
 export const AgentChat: React.FC<AgentChatProps> = ({ onResponse }) => {
@@ -14,23 +16,22 @@ export const AgentChat: React.FC<AgentChatProps> = ({ onResponse }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch(`${API_ENDPOINTS.AGENT}/chat`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'hackathon-2024-key'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message: input })
       });
 
       const data = await response.json();
       if (data.success) {
-        onResponse(data.response);
+        onResponse(data.response, data.jobs ?? []);
       } else {
-        onResponse('Sorry, I encountered an error processing your request.');
+        onResponse('Sorry, I encountered an error processing your request.', []);
       }
     } catch (error) {
-      onResponse('Sorry, I could not connect to the agent service.');
+      onResponse('Sorry, I could not connect to the agent service.', []);
     } finally {
       setLoading(false);
       setInput('');
